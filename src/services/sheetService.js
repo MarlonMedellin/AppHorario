@@ -7,6 +7,12 @@ const GOOGLE_SHEET_URL = import.meta.env.PUBLIC_CSV_URL_MATRIZ;
 const CONFIG_SHEET_URL = import.meta.env.PUBLIC_CSV_URL_CONFIG;
 
 export async function fetchMatrizFlexible() {
+    // Validar URL antes de fetch para evitar errores de compilación si falta la ENV
+    if (!GOOGLE_SHEET_URL) {
+        console.error('❌ ERROR CRÍTICO: PUBLIC_CSV_URL_MATRIZ no está definida en las variables de entorno.');
+        return [];
+    }
+
     try {
         // Fetch desde Google Sheets
         const response = await fetch(GOOGLE_SHEET_URL);
@@ -42,6 +48,11 @@ export async function fetchMatrizFlexible() {
 }
 
 export async function fetchConfigUsers() {
+    if (!CONFIG_SHEET_URL) {
+        console.error('❌ ERROR CRÍTICO: PUBLIC_CSV_URL_CONFIG no está definida en las variables de entorno.');
+        return [];
+    }
+
     try {
         const response = await fetch(CONFIG_SHEET_URL);
 
