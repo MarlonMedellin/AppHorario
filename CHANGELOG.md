@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-02-05
+
+### Added
+- **Security:** Implementación de variables de entorno para proteger las URLs de Google Sheets.
+- **Config:** Soporte para `.env` local y `wrangler.json` (Cloudflare).
+
 ## [1.0.1] - 2026-02-05
 
 ### Fixed

@@ -1,10 +1,10 @@
 import Papa from 'papaparse';
 
 // URL del Google Sheet publicado como CSV - MATRIZ_FLEXIBLE (gid=667862355)
-const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7jPz93GM6sBo6PFYh5jtVK6TUEZGE8dD8xXz1YK6Sfvon4hIC4F4BFkfElzFoaOJN19VGezSUdtYF/pub?gid=667862355&single=true&output=csv';
+const GOOGLE_SHEET_URL = import.meta.env.PUBLIC_CSV_URL_MATRIZ;
 
 // URL del Google Sheet publicado como CSV - CONFIG (gid=1307903452)
-const CONFIG_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7jPz93GM6sBo6PFYh5jtVK6TUEZGE8dD8xXz1YK6Sfvon4hIC4F4BFkfElzFoaOJN19VGezSUdtYF/pub?gid=1307903452&single=true&output=csv';
+const CONFIG_SHEET_URL = import.meta.env.PUBLIC_CSV_URL_CONFIG;
 
 export async function fetchMatrizFlexible() {
     try {
