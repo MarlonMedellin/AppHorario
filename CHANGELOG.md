@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-02-05
+
+### Changed
+- **Architecture:** Migración total a **Client-Side Fetching** (React). Ahora los datos se cargan en vivo desde el navegador, eliminando la dependencia del build de Cloudflare.
+- **Components:** Conversión de `HorarioTable`, `SidebarFilters` y `DayTabs` a componentes de React.
+- **Deploy:** Eliminación de `wrangler.json` para permitir la inyección correcta de variables de entorno desde el panel de Cloudflare.
+
 ## [1.1.1] - 2026-02-05
 
 ### Fixed
