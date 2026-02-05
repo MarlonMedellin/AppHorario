@@ -1,0 +1,11 @@
+Orden_Dia,Día,Hora_Inicio,Hora_Fin,Asesor,Asignatura,Sede,Modalidad,Ubicación_Detalle,Estado,AUTO_ID_Unico,Area,Tipo
+1,Lunes,08:00,10:00,Juan Pérez,Cálculo I,Biblioteca,Presencial,Sala 1,Activo,Lunes-08-Juan,Matemáticas,Asesoría Académica
+2,Martes,10:00,12:00,Maria Garcia,Química Orgánica,Virtual,Virtual,https://meet.google.com/abc,Activo,Martes-10-Maria,Química,Asesoría Académica
+3,Miércoles,14:00,16:00,Carlos Lopez,Física I,Robledo,Presencial,Bloque M,Activo,Miercoles-14-Carlos,Física,Asesoría Académica
+4,Jueves,09:00,11:00,Elena Rodriguez,Geometría,Virtual,Virtual,https://teams.microsoft.com/xyz,Activo,Jueves-09-Elena,Matemáticas,Asesoría Académica
+5,Viernes,11:00,13:00,Ana Martinez,Inglés B1,C4TA,Presencial,Aula 202,Activo,Viernes-11-Ana,Inglés,Asesoría Académica
+1,Lunes,10:00,12:00,Luis Gonzalez,Álgebra,Biblioteca,Presencial,Sala 2,Cancelado,Lunes-10-Luis,Matemáticas,Asesoría Académica
+2,Martes,13:00,15:00,Sofia Hernandez,Biología Gral,Robledo,Presencial,Laboratorio 1,Activo,Martes-13-Sofia,Biología,Asesoría Académica
+3,Miércoles,16:00,18:00,Diego Torres,Química Gral,Virtual,WhatsApp,https://wa.me/573000000,Interno,Miercoles-16-Diego,Química,Asesoría Personalizada
+4,Jueves,08:00,10:00,Laura Diaz,Cálculo II,Biblioteca,Presencial,Sala 3,Activo,Jueves-08-Laura,Matemáticas,Asesoría Académica
+5,Viernes,14:00,16:00,Javier Ruiz,Fundamentos Prog,C4TA,Presencial,Sala Sistemas,Activo,Viernes-14-Javier,Programación,Asesoría Académica

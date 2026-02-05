@@ -1,22 +1,35 @@
-# Reglas de Negocio y UI
+# Lógica de Negocio y Reglas de UI
 
-## Filtros Excluyentes (Barra Lateral)
-- Al seleccionar un **Área**, la lista de **Asesores** y **Sedes** en el filtro debe actualizarse para mostrar solo aquellos que tienen registros activos en esa área.
+## Navegación Global
+- **Header/Navbar:** Común en todas las páginas con logo "Quedate en Colmayor" y navegación entre páginas.
+- **Subtítulo fijo:** "h2-Ingreso permanente y graduación".
+- **Tema:** Botón para cambiar entre tema claro/oscuro.
+- **Responsive:** En móvil, la barra lateral se convierte en menú hamburguesa.
 
-## Visualización de Horarios
-- **Detección de Tiempo:** Se usa la hora y el día del dispositivo del usuario.
-- **Día Actual:** En las vistas personales, el sistema debe mostrar por defecto el día actual del dispositivo, permitiendo navegar entre los otros 5 días (Lunes-Sábado).
-- **Estado de Registros:**
-    - `Activo`: Se muestra normalmente.
-    - `Interno`: Solo visible para usuarios logueados (Asesores/Psicoeducadores).
-    - `Cancelado`: Se muestra con estilo de advertencia (rojo) y el botón de unión desactivado.
 
-## Componente Card
-- **Diseño:** Borde izquierdo de color dinámico según el **Área** (ej. Matemáticas: Azul, Química: Verde).
-- **Acción Principal:** Botón "Unirme" grande y destacado para modalidades Virtuales (Meet, Teams, WhatsApp).
-- **Comportamiento:** Cada Card abierta desde filtros externos (Google Sites) debe abrirse en una pestaña nueva apuntando al `index` con parámetros de búsqueda.
+## Interfaz Pública (Index)
+- **Barra Lateral:** Filtros excluyentes. Si el usuario filtra por "Sede: Robledo", las listas de "Áreas" y "Asesores" solo mostrarán opciones disponibles para esa sede.
+- **Caja de Búsqueda:** Búsqueda por texto libre en todos los campos (Asesor, Asignatura, Sede).
+- **Pestañas de Días:** Filtran automáticamente por el día seleccionado. Por defecto muestra el día actual del dispositivo.
+- **Visualización de Datos:**
+    - **Desktop:** Tabla con columnas (Día, Hora, Asignatura, Asesor, Ubicación, Sede, Modalidad).
+    - **Mobile:** Cards apiladas con la mejor práctica de diseño responsivo.
+    - Borde lateral izquierdo coloreado según el campo **Area**.
+    - Enlace "Unirme" visible solo si la modalidad es Virtual o WhatsApp.
+    - Si el `Estado` es "Cancelado", la fila se muestra tachada con texto "Cancelado".
+    - Si el `Estado` es "Interno", muestra indicador visual y texto: "Este horario es para contratistas/docentes y no debe ser compartido con estudiantes".
 
-## Autenticación
-- Persistencia en `localStorage`.
-- Si el usuario no está en el CSV de `USUARIOS`, se deniega el acceso.
-- Los perfiles definen la visibilidad de las rutas internas.
+## Vistas Privadas (Auth simple)
+- **Login:** Modal sin contraseña, validando contra el CSV de la hoja `CONFIG`. Sesión persistente en `localStorage`. Después del login, redirige a `/horario-personal`.
+- **Horario Personal:**
+    - Muestra todos los registros de `MATRIZ_FLEXIBLE`.
+    - El usuario puede ver todas las asesorías.
+    - Se abre por defecto mostrando todos los días.
+    - Layout: Pestañas de días + Tabla (Desktop) / Cards (Mobile).
+- **Consulta Personalizados:**
+    - Accesible para todos los usuarios autenticados.
+    - Lista todos los registros donde `Tipo == "Asesoría Personalizada"`.
+    - Layout: Pestañas de días + Tabla (Desktop) / Cards (Mobile).
+
+## Integración
+- Todo clic en elementos de filtrado desde Google Sites debe redirigir a la URL de Cloudflare Pages con el parámetro de consulta correspondiente, abriéndose siempre en pestaña nueva.

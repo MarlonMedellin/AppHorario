@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* Theme Variables */
+:root {
+	--color-primary: #2563eb;
+	--color-primary-dark: #1e40af;
+}
+
+.dark {
+	--color-primary: #3b82f6;
+	--color-primary-dark: #2563eb;
+}
+
+/* Area Colors - Standard CSS to avoid @apply issues with v4 */
+.area-matematicas {
+	border-left-width: 4px;
+	border-left-color: #3b82f6;
+	/* blue-500 */
+}
+
+.area-quimica {
+	border-left-width: 4px;
+	border-left-color: #22c55e;
+	/* green-500 */
+}
+
+.area-fisica {
+	border-left-width: 4px;
+	border-left-color: #a855f7;
+	/* purple-500 */
+}
+
+.area-ingles {
+	border-left-width: 4px;
+	border-left-color: #ef4444;
+	/* red-500 */
+}
+
+.area-biologia {
+	border-left-width: 4px;
+	border-left-color: #14b8a6;
+	/* teal-500 */
+}
+
+.area-programacion {
+	border-left-width: 4px;
+	border-left-color: #4f46e5;
+	/* indigo-600 */
+}
+
+/* Table Styles */
+.horario-table {
+	@apply w-full border-collapse;
+}
+
+.horario-table th {
+	@apply bg-gray-100 dark:bg-gray-700 px-4 py-3 text-left text-sm font-semibold;
+}
+
+.horario-table td {
+	@apply px-4 py-3 border-b border-gray-200 dark:border-gray-700;
+}
+
+.horario-table tr {
+	@apply hover:bg-gray-50 dark:hover:bg-gray-800 transition;
+}
+
+/* State Styles */
+.estado-cancelado {
+	@apply line-through opacity-60;
+}
+
+.estado-interno {
+	@apply bg-yellow-50 dark:bg-yellow-900/20;
+}
+
+/* Mobile Card Styles */
+@media (max-width: 768px) {
+	.horario-table {
+		@apply hidden;
+	}
+
+	.horario-cards {
+		@apply block;
+	}
+}
+
+@media (min-width: 769px) {
+	.horario-cards {
+		@apply hidden;
+	}
+}

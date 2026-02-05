@@ -1,0 +1,52 @@
+---
+import { fetchMatrizFlexible } from "../services/sheetService";
+import Layout from "../layouts/Layout.astro";
+import DayTabs from "../components/DayTabs.astro";
+import HorarioTable from "../components/HorarioTable.astro";
+
+// Fetch data
+const allData = await fetchMatrizFlexible();
+
+// Filter only personalized sessions (Tipo === "Asesoría Personalizada")
+const personalizedData = allData.filter(
+    (item) => item.Tipo && item.Tipo.toLowerCase().includes("personalizada"),
+);
+
+const currentDay = null;
+---
+
+<Layout title="Asesorías Personalizadas - HorariosQuedate">
+    <div class="container mx-auto px-4 py-8">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                Asesorías Personalizadas
+            </h1>
+            <p class="text-slate-600 dark:text-slate-400">
+                Vista de todas las asesorías personalizadas
+            </p>
+        </div>
+
+        <!-- Day Tabs -->
+        <DayTabs activeDay={currentDay} />
+
+        <!-- Results Count -->
+        <div class="mb-4 text-sm text-slate-600 dark:text-slate-400">
+            Mostrando <span class="font-bold text-blue-600 dark:text-blue-400"
+                >{personalizedData.length}</span
+            > asesorías personalizadas
+        </div>
+
+        <!-- Table -->
+        <HorarioTable data={personalizedData} />
+    </div>
+</Layout>
+
+<script>
+    import { isAuthenticated } from "../services/authService";
+
+    // Check authentication only (no role restriction)
+    if (!isAuthenticated()) {
+        alert("Debes iniciar sesión para acceder a esta página");
+        window.location.href = "/";
+    }
+</script>

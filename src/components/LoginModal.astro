@@ -1,0 +1,228 @@
+---
+// LoginModal.astro - Modal component for user authentication
+---
+
+<div id="login-modal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div
+        class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+        id="modal-backdrop"
+    >
+    </div>
+
+    <!-- Modal -->
+    <div class="relative flex items-center justify-center min-h-screen p-4">
+        <div
+            class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+        >
+            <!-- Close Button -->
+            <button
+                id="close-modal"
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                aria-label="Cerrar modal"
+            >
+                <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <!-- Header -->
+            <div class="text-center mb-6">
+                <h2
+                    id="modal-title"
+                    class="text-2xl font-bold text-slate-900 dark:text-white mb-2"
+                >
+                    Iniciar Sesión
+                </h2>
+                <p class="text-sm text-slate-600 dark:text-slate-400">
+                    Ingresa tu correo institucional
+                </p>
+            </div>
+
+            <!-- Form -->
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label
+                        for="email-input"
+                        class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                    >
+                        Correo electrónico
+                    </label>
+                    <input
+                        type="email"
+                        id="email-input"
+                        required
+                        placeholder="tu.correo@colmayor.edu.co"
+                        class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    />
+                </div>
+
+                <!-- Error Message -->
+                <div
+                    id="error-message"
+                    class="hidden p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+                >
+                    <p class="text-sm text-red-600 dark:text-red-400"></p>
+                </div>
+
+                <!-- Success Message -->
+                <div
+                    id="success-message"
+                    class="hidden p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
+                >
+                    <p class="text-sm text-green-600 dark:text-green-400"></p>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                    type="submit"
+                    id="submit-button"
+                    class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <span id="button-text">Ingresar</span>
+                    <span id="button-loading" class="hidden">
+                        <svg
+                            class="animate-spin h-5 w-5 mx-auto"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                        </svg>
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    import { fetchConfigUsers } from "../services/sheetService";
+    import { validateUser, login } from "../services/authService";
+
+    const modal = document.getElementById("login-modal");
+    const backdrop = document.getElementById("modal-backdrop");
+    const closeButton = document.getElementById("close-modal");
+    const form = document.getElementById("login-form");
+    const emailInput = document.getElementById(
+        "email-input",
+    ) as HTMLInputElement;
+    const submitButton = document.getElementById(
+        "submit-button",
+    ) as HTMLButtonElement;
+    const buttonText = document.getElementById("button-text");
+    const buttonLoading = document.getElementById("button-loading");
+    const errorMessage = document.getElementById("error-message");
+    const successMessage = document.getElementById("success-message");
+
+    // Open modal
+    window.addEventListener("open-login-modal", () => {
+        modal?.classList.remove("hidden");
+        emailInput?.focus();
+    });
+
+    // Close modal
+    function closeModal() {
+        modal?.classList.add("hidden");
+        form?.reset();
+        errorMessage?.classList.add("hidden");
+        successMessage?.classList.add("hidden");
+    }
+
+    closeButton?.addEventListener("click", closeModal);
+    backdrop?.addEventListener("click", closeModal);
+
+    // ESC key to close
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !modal?.classList.contains("hidden")) {
+            closeModal();
+        }
+    });
+
+    // Form submission
+    form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = emailInput?.value.trim();
+        if (!email) return;
+
+        // Show loading
+        submitButton.disabled = true;
+        buttonText?.classList.add("hidden");
+        buttonLoading?.classList.remove("hidden");
+        errorMessage?.classList.add("hidden");
+        successMessage?.classList.add("hidden");
+
+        try {
+            // Fetch CONFIG users
+            const configUsers = await fetchConfigUsers();
+
+            // Validate user
+            const user = validateUser(email, configUsers);
+
+            if (!user) {
+                // User not found
+                errorMessage?.classList.remove("hidden");
+                const errorText = errorMessage?.querySelector("p");
+                if (errorText) {
+                    errorText.textContent =
+                        "Correo no encontrado. Verifica tu dirección de correo institucional.";
+                }
+            } else {
+                // Login successful
+                login(user);
+
+                successMessage?.classList.remove("hidden");
+                const successText = successMessage?.querySelector("p");
+                if (successText) {
+                    successText.textContent = `¡Bienvenido/a, ${user.Asesores}!`;
+                }
+
+                // Emit auth-changed event
+                window.dispatchEvent(new CustomEvent("auth-changed"));
+
+                // Close modal after 1 second
+                setTimeout(() => {
+                    closeModal();
+                    // Redirect to horario-personal
+                    window.location.href = "/horario-personal";
+                }, 1000);
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            errorMessage?.classList.remove("hidden");
+            const errorText = errorMessage?.querySelector("p");
+            if (errorText) {
+                errorText.textContent =
+                    "Error al iniciar sesión. Por favor intenta de nuevo.";
+            }
+        } finally {
+            // Hide loading
+            submitButton.disabled = false;
+            buttonText?.classList.remove("hidden");
+            buttonLoading?.classList.add("hidden");
+        }
+    });
+</script>

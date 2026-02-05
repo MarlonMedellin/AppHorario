@@ -1,0 +1,447 @@
+---
+const { allData, showOtherSedes = true } = Astro.props;
+
+// Complete static lists
+const allAreas = [
+  "Matemáticas",
+  "Cálculos",
+  "Álgebra Lineal y Geometrías",
+  "Estadísticas",
+  "Físicas",
+  "Químicas",
+];
+
+const allAsesores = [
+  "Alejandro Martínez Valencia",
+  "Efraín Palacios Mosquera",
+  "Faidher Galindo",
+  "Tobias Garcia Mejia",
+  "Xiomara Quintero Gómez",
+  "Yohana Ramírez Suárez",
+  "Marlon Arcila Vanegas",
+  "Maribel Castrillon Zuluaga",
+];
+
+const prioritySedes = ["Robledo", "C4TA", "Virtual"];
+---
+
+<div class="bg-white dark:bg-slate-800 h-full p-6 overflow-y-auto relative">
+  <!-- Header with Clear Button -->
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">
+      Filtros
+    </h2>
+    <button
+      id="clear-filters-btn"
+      class="text-xs px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition font-medium hidden"
+      title="Limpiar todos los filtros"
+    >
+      <span class="flex items-center gap-1">
+        <svg
+          class="w-3.5 h-3.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        Limpiar
+      </span>
+    </button>
+  </div>
+
+  <!-- Áreas -->
+  <div class="mb-6">
+    <h3
+      class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3"
+    >
+      Áreas
+    </h3>
+    <div id="filter-Area" class="space-y-2">
+      <!-- Contenido dinámico -->
+    </div>
+  </div>
+
+  <!-- Sede -->
+  <div class="mb-6">
+    <h3
+      class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3"
+    >
+      Sede
+    </h3>
+    <!-- Priority Sedes -->
+    <div id="filter-Sede-priority" class="space-y-2 mb-2"></div>
+
+    <!-- Collapsible Others -->
+    {
+      showOtherSedes && (
+        <details class="mt-2">
+          <summary class="cursor-pointer text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-1">
+            Otras sedes
+          </summary>
+          <div id="filter-Sede-others" class="space-y-2 mt-2 pl-2" />
+        </details>
+      )
+    }
+  </div>
+
+  <!-- Asesores -->
+  <div>
+    <h3
+      class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3"
+    >
+      Asesores
+    </h3>
+    <div id="filter-Asesor" class="space-y-2 max-h-60 overflow-y-auto"></div>
+  </div>
+</div>
+
+<!-- Modal de Feedback (Hidden by default) -->
+<div
+  id="feedback-modal"
+  class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 hidden opacity-0 transition-opacity duration-300"
+>
+  <div
+    class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 transform scale-95 transition-transform duration-300 flex flex-col items-center text-center"
+  >
+    <div
+      class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-4 text-blue-500 dark:text-blue-400"
+    >
+      <svg
+        class="w-8 h-8"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+    </div>
+    <h3
+      id="modal-title"
+      class="text-lg font-bold text-slate-900 dark:text-white mb-2"
+    >
+      Aviso
+    </h3>
+    <p id="modal-message" class="text-slate-600 dark:text-slate-400 mb-6">
+      Mensaje de feedback
+    </p>
+    <button
+      id="close-modal-btn"
+      class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
+    >
+      Entendido
+    </button>
+  </div>
+</div>
+
+<script define:vars={{ initialData: allData }}>
+  let state = {
+    data: initialData,
+    filters: {
+      Area: new Set(),
+      Sede: new Set(),
+      Asesor: new Set(),
+    },
+  };
+
+  const containers = {
+    Area: document.getElementById("filter-Area"),
+    Sede: {
+      priority: document.getElementById("filter-Sede-priority"),
+      others: document.getElementById("filter-Sede-others"),
+    },
+    Asesor: document.getElementById("filter-Asesor"),
+  };
+
+  // Static lists
+  const staticAreas = [
+    "Matemáticas",
+    "Cálculos",
+    "Álgebra Lineal y Geometrías",
+    "Estadísticas",
+    "Físicas",
+    "Químicas",
+  ];
+
+  const staticAsesores = [
+    "Alejandro Martínez Valencia",
+    "Efraín Palacios Mosquera",
+    "Faidher Galindo",
+    "Tobias Garcia Mejia",
+    "Xiomara Quintero Gómez",
+    "Yohana Ramírez Suárez",
+  ];
+
+  // Logic for Sede
+  const allSedes = [
+    ...new Set(initialData.map((d) => d.Sede).filter(Boolean)),
+  ].sort();
+
+  function init() {
+    // Deep Linking
+    const urlParams = new URLSearchParams(window.location.search);
+    ["Area", "Sede", "Asesor"].forEach((key) => {
+      const paramVal = urlParams.get(key.toLowerCase());
+      if (paramVal) {
+        state.filters[key].add(decodeURIComponent(paramVal));
+      }
+    });
+
+    renderAllFilters();
+
+    // If initial filters exist
+    if (urlParams.toString()) {
+      const filtered = filterData();
+      const event = new CustomEvent("filters-applied", { detail: filtered });
+      document.dispatchEvent(event);
+    }
+
+    toggleClearButton();
+
+    // Attach global change listener for filters
+    document.addEventListener("change", (e) => {
+      if (e.target.dataset.filterType) {
+        handleFilterChange(
+          e.target.dataset.filterType,
+          e.target.value,
+          e.target.checked,
+        );
+      }
+    });
+
+    // Clear button listener
+    document
+      .getElementById("clear-filters-btn")
+      ?.addEventListener("click", clearFilters);
+
+    // Modal Close
+    document
+      .getElementById("close-modal-btn")
+      ?.addEventListener("click", hideModal);
+    document
+      .getElementById("feedback-modal")
+      ?.addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) hideModal();
+      });
+  }
+
+  function renderAllFilters() {
+    renderStaticGroup(containers.Area, staticAreas, state.filters.Area, "Area");
+    renderSedeFilters(allSedes, state.filters.Sede);
+    renderStaticGroup(
+      containers.Asesor,
+      staticAsesores,
+      state.filters.Asesor,
+      "Asesor",
+    );
+  }
+
+  function handleFilterChange(type, value, checked) {
+    if (checked) {
+      state.filters[type].add(value);
+    } else {
+      state.filters[type].delete(value);
+    }
+
+    updateURL();
+    toggleClearButton();
+
+    const filtered = filterData();
+
+    // Check for empty results and trigger modal
+    if (filtered.length === 0 && checked) {
+      // Only show modal when adding a filter results in empty state
+      showEmptyFeedback(type);
+    }
+
+    // Emit event for Grid update
+    const event = new CustomEvent("filters-applied", { detail: filtered });
+    document.dispatchEvent(event);
+  }
+
+  function showEmptyFeedback(filterType) {
+    let message = "No se encontraron resultados.";
+    let title = "Sin Resultados";
+
+    switch (filterType) {
+      case "Area":
+        message = "No hay asignaturas programadas para esta área actualmente.";
+        title = "Área Sin Programación";
+        break;
+      case "Asesor":
+        message = "Este asesor no tiene horarios programados actualmente.";
+        title = "Asesor No Programado";
+        break;
+      case "Sede":
+        message = "No hay horarios programados en esta sede actualmente.";
+        title = "Sede Sin Programación";
+        break;
+    }
+
+    showModal(title, message);
+  }
+
+  function showModal(title, message) {
+    const modal = document.getElementById("feedback-modal");
+    const titleEl = document.getElementById("modal-title");
+    const msgEl = document.getElementById("modal-message");
+
+    if (modal && titleEl && msgEl) {
+      titleEl.textContent = title;
+      msgEl.textContent = message;
+      modal.classList.remove("hidden");
+      // Small delay to allow display block to apply before opacity transition
+      setTimeout(() => {
+        modal.classList.remove("opacity-0");
+        modal.querySelector("div")?.classList.remove("scale-95");
+        modal.querySelector("div")?.classList.add("scale-100");
+      }, 10);
+    }
+  }
+
+  function hideModal() {
+    const modal = document.getElementById("feedback-modal");
+    if (modal) {
+      modal.classList.add("opacity-0");
+      modal.querySelector("div")?.classList.remove("scale-100");
+      modal.querySelector("div")?.classList.add("scale-95");
+      setTimeout(() => {
+        modal.classList.add("hidden");
+      }, 300);
+    }
+  }
+
+  function updateURL() {
+    const params = new URLSearchParams();
+    for (const [key, set] of Object.entries(state.filters)) {
+      if (set.size > 0) {
+        params.set(key.toLowerCase(), Array.from(set).join(","));
+      }
+    }
+    const newUrl = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
+    window.history.pushState({}, "", newUrl);
+  }
+
+  // Helper for accent insensitivity
+  function normalize(str) {
+    return str
+      ? str
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+      : "";
+  }
+
+  function filterData() {
+    return state.data.filter((item) => {
+      // Area match (accent insensitive)
+      let matchArea = state.filters.Area.size === 0;
+      if (!matchArea && item.Area) {
+        const itemAreaNorm = normalize(item.Area);
+        for (const filterVal of state.filters.Area) {
+          if (normalize(filterVal) === itemAreaNorm) {
+            matchArea = true;
+            break;
+          }
+        }
+      } else if (!matchArea) {
+        // If item has no area but filters are active, it shouldn't match unless logic allows
+        matchArea = false;
+      }
+
+      const matchSede =
+        state.filters.Sede.size === 0 || state.filters.Sede.has(item.Sede);
+      const matchAsesor =
+        state.filters.Asesor.size === 0 ||
+        state.filters.Asesor.has(item.Asesor);
+      return matchArea && matchSede && matchAsesor;
+    });
+  }
+
+  function clearFilters() {
+    state.filters.Area.clear();
+    state.filters.Sede.clear();
+    state.filters.Asesor.clear();
+    updateURL();
+    toggleClearButton();
+    document
+      .querySelectorAll('input[type="checkbox"][data-filter-type]')
+      .forEach((cb) => {
+        cb.checked = false;
+      });
+    const event = new CustomEvent("filters-applied", { detail: state.data });
+    document.dispatchEvent(event);
+  }
+
+  function toggleClearButton() {
+    const clearBtn = document.getElementById("clear-filters-btn");
+    const hasFilters =
+      state.filters.Area.size > 0 ||
+      state.filters.Sede.size > 0 ||
+      state.filters.Asesor.size > 0;
+
+    if (hasFilters) {
+      clearBtn?.classList.remove("hidden");
+    } else {
+      clearBtn?.classList.add("hidden");
+    }
+  }
+
+  function renderStaticGroup(container, values, currentSelection, filterType) {
+    if (!container) return;
+    const html = values
+      .map((val) => {
+        const checked = currentSelection.has(val) ? "checked" : "";
+        return `
+          <label class="flex items-center space-x-2 cursor-pointer group">
+            <input type="checkbox" value="${val}" data-filter-type="${filterType}" ${checked} 
+              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition">
+            <span class="text-sm text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">${val}</span>
+          </label>
+        `;
+      })
+      .join("");
+    container.innerHTML = html;
+  }
+
+  function renderSedeFilters(values, currentSelection) {
+    const prioritySedes = ["Robledo", "C4TA", "Virtual"];
+    const priorityValues = values.filter((v) => prioritySedes.includes(v));
+    const otherValues = values.filter((v) => !prioritySedes.includes(v));
+
+    if (containers.Sede.priority) {
+      const priorityHtml = priorityValues
+        .map((val) => createCheckboxHtml(val, "Sede", currentSelection))
+        .join("");
+      containers.Sede.priority.innerHTML = priorityHtml;
+    }
+
+    if (containers.Sede.others) {
+      const othersHtml = otherValues
+        .map((val) => createCheckboxHtml(val, "Sede", currentSelection))
+        .join("");
+      containers.Sede.others.innerHTML = othersHtml;
+    }
+  }
+
+  function createCheckboxHtml(val, type, selectionSet) {
+    const checked = selectionSet.has(val) ? "checked" : "";
+    return `
+      <label class="flex items-center space-x-2 cursor-pointer group">
+        <input type="checkbox" value="${val}" data-filter-type="${type}" ${checked} 
+          class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition">
+        <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">${val}</span>
+      </label>
+    `;
+  }
+
+  init();
+</script>

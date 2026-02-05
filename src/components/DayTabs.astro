@@ -1,0 +1,80 @@
+---
+const { activeDay } = Astro.props;
+
+// Get current day
+const today = new Date().getDay();
+const daysMap = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+];
+const currentDay = daysMap[today];
+
+const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+---
+
+<div class="mb-6">
+    <div class="flex gap-2 overflow-x-auto pb-2">
+        <!-- Todo Tab -->
+        <button
+            data-day=""
+            class={`px-4 py-2 rounded-lg whitespace-nowrap transition ${
+                !activeDay || activeDay === ""
+                    ? "bg-blue-600 text-white"
+                    : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
+            }`}
+        >
+            Todo
+        </button>
+
+        {
+            days.map((day) => {
+                const isActive = activeDay === day;
+                const isToday = day === currentDay;
+                return (
+                    <button
+                        data-day={day}
+                        class={`px-4 py-2 rounded-lg whitespace-nowrap transition relative ${
+                            isActive
+                                ? "bg-blue-600 text-white"
+                                : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
+                        }`}
+                    >
+                        {day}
+                        {isToday && !isActive && (
+                            <span class="absolute -top-1 -right-1 w-2 h-2 bg-blue-600 rounded-full" />
+                        )}
+                    </button>
+                );
+            })
+        }
+    </div>
+</div>
+
+<script>
+    const buttons = document.querySelectorAll("[data-day]");
+    buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const day = (btn as HTMLElement).dataset.day || "";
+
+            // Update active state
+            buttons.forEach((b) => {
+                if ((b as HTMLElement).dataset.day === day) {
+                    b.className =
+                        "px-4 py-2 rounded-lg whitespace-nowrap transition bg-blue-600 text-white";
+                } else {
+                    b.className =
+                        "px-4 py-2 rounded-lg whitespace-nowrap transition relative bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600";
+                }
+            });
+
+            // Emit event
+            const event = new CustomEvent("day-changed", { detail: day });
+            document.dispatchEvent(event);
+        });
+    });
+</script>
