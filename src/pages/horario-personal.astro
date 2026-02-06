@@ -21,7 +21,8 @@ const uniqueAsesores = [
         (function () {
             const session = localStorage.getItem("user_session");
             if (!session) {
-                // No logueado. Redirigir.
+                // No logueado. Mostrar mensaje y redirigir.
+                alert("Debes iniciar sesión para acceder a esta página");
                 window.location.href = "/";
             }
         })();
