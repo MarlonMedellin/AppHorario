@@ -1,30 +1,31 @@
 import React, { useState } from 'react';
 
-export default function SidebarFilters({ allData, currentFilters, onFilterChange }) {
+export default function SidebarFilters({ allData, currentFilters, availableOptions, onFilterChange }) {
     const [showOtherSedes, setShowOtherSedes] = useState(false);
     const [modal, setModal] = useState({ show: false, title: "", message: "" });
 
-    // Listas estáticas
-    const staticAreas = [
+    // 1. Áreas (Dinámicas a partir de la data completa + disponibilidad)
+    // Obtenemos TODAS las áreas posibles de la data estática o cruda para mostrar, 
+    // pero marcamos como disabled/dimmed las que no están en availableOptions.
+    const allAreas = [
         "Matemáticas", "Cálculos", "Álgebra Lineal y Geometrías",
         "Estadísticas", "Físicas", "Químicas"
-    ];
+    ]; // Preferimos mantener este orden "lógico" si es posible.
 
-    const staticAsesores = [
-        "Alejandro Martínez Valencia", "Efraín Palacios Mosquera",
-        "Faidher Galindo", "Tobias Garcia Mejia",
-        "Xiomara Quintero Gómez", "Yohana Ramírez Suárez",
-        "Marlon Arcila Vanegas", "Maribel Castrillon Zuluaga"
-    ];
-
+    // 2. Sedes
+    // Prioridad visual
     const prioritySedes = ["Robledo", "C4TA", "Virtual"];
+    // Extraer todas de availableOptions o allData
+    // Si queremos listar TO_DAS pero deshabilitar inaccesibles:
+    const allUniqueSedes = [...new Set(allData.map(d => d.Sede).filter(Boolean))].sort();
+    const otherSedes = allUniqueSedes.filter(s => !prioritySedes.includes(s));
 
-    // Obtener todas las sedes dinámicamente de los datos (aunque data puede estar vacía al inicio)
-    // Es mejor usar un Set de lo que llegue en allData si queremos que sea dinámico, 
-    // pero si allData está vacío al principio, no mostrará nada.
-    // Usaremos los priority siempre visibles.
-    const uniqueSedes = [...new Set(allData.map(d => d.Sede).filter(Boolean))].sort();
-    const otherSedes = uniqueSedes.filter(s => !prioritySedes.includes(s));
+    // 3. Asesores (Totalmente dinámico basado en disponibilidad)
+    // Mostramos solo los disponibles para no saturar, u obtenemos todos y ordenamos?
+    // Petición: "Smart Filters... las listas... se reduzcan".
+    // Entonces mostramos solo `availableOptions.Asesor`.
+    const availableAsesoresList = [...availableOptions.Asesor].sort();
+
 
     const handleCheckboxChange = (type, value, checked) => {
         const newSet = new Set(currentFilters[type]);
@@ -33,15 +34,7 @@ export default function SidebarFilters({ allData, currentFilters, onFilterChange
         } else {
             newSet.delete(value);
         }
-
-        const newFilters = { ...currentFilters, [type]: newSet };
-
-        // Verificar si la combinación devuelve resultados
-        // Esto es una optimización/feedback visual opcional, 
-        // pero podemos delegarlo al Dashboard o hacerlo aquí si tenemos 'allData'.
-        // Por simplicidad, solo actualizamos los filtros. El conteo se actualiza en Dashboard.
-
-        onFilterChange(newFilters);
+        onFilterChange({ ...currentFilters, [type]: newSet });
     };
 
     const clearFilters = () => {
@@ -76,17 +69,25 @@ export default function SidebarFilters({ allData, currentFilters, onFilterChange
             <div className="mb-6">
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">Áreas</h3>
                 <div className="space-y-2">
-                    {staticAreas.map(area => (
-                        <label key={area} className="flex items-center space-x-2 cursor-pointer group">
-                            <input
-                                type="checkbox"
-                                checked={currentFilters.Area.has(area)}
-                                onChange={(e) => handleCheckboxChange('Area', area, e.target.checked)}
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition"
-                            />
-                            <span className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">{area}</span>
-                        </label>
-                    ))}
+                    {allAreas.map(area => {
+                        const isAvailable = availableOptions.Area.has(area);
+                        const isChecked = currentFilters.Area.has(area);
+
+                        return (
+                            <label key={area} className={`flex items-center space-x-2 cursor-pointer group ${!isAvailable && !isChecked ? 'opacity-50' : ''}`}>
+                                <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    disabled={!isAvailable && !isChecked}
+                                    onChange={(e) => handleCheckboxChange('Area', area, e.target.checked)}
+                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition"
+                                />
+                                <span className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                                    {area} {!isAvailable && !isChecked && '(0)'}
+                                </span>
+                            </label>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -94,17 +95,22 @@ export default function SidebarFilters({ allData, currentFilters, onFilterChange
             <div className="mb-6">
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">Sede</h3>
                 <div className="space-y-2 mb-2">
-                    {prioritySedes.map(sede => (
-                        <label key={sede} className="flex items-center space-x-2 cursor-pointer group">
-                            <input
-                                type="checkbox"
-                                checked={currentFilters.Sede.has(sede)}
-                                onChange={(e) => handleCheckboxChange('Sede', sede, e.target.checked)}
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition"
-                            />
-                            <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">{sede}</span>
-                        </label>
-                    ))}
+                    {prioritySedes.map(sede => {
+                        const isAvailable = availableOptions.Sede.has(sede);
+                        const isChecked = currentFilters.Sede.has(sede);
+                        return (
+                            <label key={sede} className={`flex items-center space-x-2 cursor-pointer group ${!isAvailable && !isChecked ? 'opacity-50' : ''}`}>
+                                <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    disabled={!isAvailable && !isChecked}
+                                    onChange={(e) => handleCheckboxChange('Sede', sede, e.target.checked)}
+                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition"
+                                />
+                                <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">{sede}</span>
+                            </label>
+                        );
+                    })}
                 </div>
 
                 {/* Other Sedes Collapsible */}
@@ -118,17 +124,24 @@ export default function SidebarFilters({ allData, currentFilters, onFilterChange
                     </button>
                     {showOtherSedes && (
                         <div className="space-y-2 mt-2 pl-2 border-l-2 border-slate-100 dark:border-slate-700">
-                            {otherSedes.length > 0 ? otherSedes.map(sede => (
-                                <label key={sede} className="flex items-center space-x-2 cursor-pointer group">
-                                    <input
-                                        type="checkbox"
-                                        checked={currentFilters.Sede.has(sede)}
-                                        onChange={(e) => handleCheckboxChange('Sede', sede, e.target.checked)}
-                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition"
-                                    />
-                                    <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">{sede}</span>
-                                </label>
-                            )) : <p className="text-xs text-gray-400">Cargando sedes...</p>}
+                            {otherSedes.length > 0 ? otherSedes.map(sede => {
+                                const isAvailable = availableOptions.Sede.has(sede);
+                                const isChecked = currentFilters.Sede.has(sede);
+                                return (
+                                    (
+                                        <label key={sede} className={`flex items-center space-x-2 cursor-pointer group ${!isAvailable && !isChecked ? 'opacity-50' : ''}`}>
+                                            <input
+                                                type="checkbox"
+                                                checked={isChecked}
+                                                disabled={!isAvailable && !isChecked}
+                                                onChange={(e) => handleCheckboxChange('Sede', sede, e.target.checked)}
+                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition"
+                                            />
+                                            <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">{sede}</span>
+                                        </label>
+                                    )
+                                )
+                            }) : <p className="text-xs text-gray-400">Cargando sedes...</p>}
                         </div>
                     )}
                 </div>
@@ -138,7 +151,7 @@ export default function SidebarFilters({ allData, currentFilters, onFilterChange
             <div>
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">Asesores</h3>
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {staticAsesores.map(asesor => (
+                    {availableAsesoresList.length > 0 ? availableAsesoresList.map(asesor => (
                         <label key={asesor} className="flex items-center space-x-2 cursor-pointer group">
                             <input
                                 type="checkbox"
@@ -148,7 +161,9 @@ export default function SidebarFilters({ allData, currentFilters, onFilterChange
                             />
                             <span className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">{asesor}</span>
                         </label>
-                    ))}
+                    )) : (
+                        <p className="text-xs text-slate-500 italic">No hay asesores disponibles con los filtros actuales.</p>
+                    )}
                 </div>
             </div>
 

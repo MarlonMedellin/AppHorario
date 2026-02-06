@@ -9,7 +9,10 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [filteredData, setFilteredData] = useState([]);
 
-    // Filtros de estado
+    // Mapeo de días (0=Domingo, 1=Lunes...)
+    const daysMap = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+    // Estados iniciales
     const [currentDay, setCurrentDay] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [activeFilters, setActiveFilters] = useState({
@@ -17,55 +20,102 @@ export default function Dashboard() {
         Sede: new Set(),
         Asesor: new Set()
     });
+    const [availableOptions, setAvailableOptions] = useState({
+        Area: new Set(),
+        Sede: new Set(),
+        Asesor: new Set()
+    });
 
-    // Carga de datos inicial
+    // 1. Carga inicial + Deep Linking + Auto-Day
     useEffect(() => {
-        async function loadData() {
+        async function init() {
             try {
+                // Fetch Data
                 const fetchedData = await fetchMatrizFlexible();
                 setData(fetchedData);
                 setFilteredData(fetchedData);
+
+                // Auto-Day
+                const todayIndex = new Date().getDay();
+                const todayName = daysMap[todayIndex];
+                // Si es domingo (0), tal vez mostrar Lunes o dejar vacío. Asumimos mostrar día actual si existe en tabs.
+                // Ajuste: si hoy es sábado/domingo y no hay asesoria, igual seteamos el día.
+                setCurrentDay(todayName === "Domingo" ? "Lunes" : todayName);
+
+                // Deep Linking
+                const params = new URLSearchParams(window.location.search);
+                const initialFilters = {
+                    Area: new Set(),
+                    Sede: new Set(),
+                    Asesor: new Set()
+                };
+                let hasDeepLinks = false;
+
+                if (params.has('asesor')) {
+                    const asesorParam = params.get('asesor');
+                    // Buscar coincidencia inexacta o exacta?
+                    // Por exactitud, asumimos que viene limpio o intentamos calzar.
+                    // Iteramos datos para buscar match
+                    const match = fetchedData.find(d => d.Asesor.toLowerCase().includes(asesorParam.toLowerCase()));
+                    if (match) initialFilters.Asesor.add(match.Asesor);
+                    hasDeepLinks = true;
+                }
+                if (params.has('sede')) {
+                    const sedeParam = params.get('sede');
+                    // Similar logic or direct add
+                    const match = fetchedData.find(d => d.Sede.toLowerCase() === sedeParam.toLowerCase());
+                    if (match) initialFilters.Sede.add(match.Sede);
+                    hasDeepLinks = true;
+                }
+                if (params.has('area')) {
+                    const areaParam = params.get('area');
+                    // Note: Area param might need normalization match
+                    const match = fetchedData.find(d => d.Area.toLowerCase() === areaParam.toLowerCase());
+                    if (match) initialFilters.Area.add(match.Area);
+                    hasDeepLinks = true;
+                }
+
+                if (hasDeepLinks) {
+                    setActiveFilters(initialFilters);
+                    // Si aplicamos deep link, el día tal vez deba resetearse o mantenerse?
+                    // Mantenemos Auto-Day salvo que no haya resultados, pero dejemoslo así.
+                }
+
             } catch (error) {
                 console.error("Error loading data:", error);
             } finally {
                 setLoading(false);
             }
         }
-        loadData();
+        init();
     }, []);
 
-    // Lógica de filtrado centralizada
+    // 2. Lógica de Filtrado y Smart Filters Calculations
     useEffect(() => {
         if (!data.length) return;
 
-        let result = data.filter(item => {
-            // 1. Filtro por Día (Tab)
+        // --- A. Calcular Data Filtrada para la Tabla ---
+        const result = data.filter(item => {
             if (currentDay && item.Día !== currentDay) return false;
 
-            // 2. Filtro por Búsqueda
             if (searchTerm) {
                 const searchString = `${item.Día} ${item.Asignatura} ${item.Asesor} ${item.Sede} ${item.Ubicación_Detalle || ''}`.toLowerCase();
                 if (!searchString.includes(searchTerm.toLowerCase())) return false;
             }
 
-            // 3. Filtros del Sidebar (Area, Sede, Asesor)
-            // Area (Normalizado)
+            // Check Filters
+            // Area
             if (activeFilters.Area.size > 0) {
                 const normalize = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
                 const itemAreaNorm = normalize(item.Area);
-                let matchesArea = false;
-                for (let filterVal of activeFilters.Area) {
-                    if (normalize(filterVal) === itemAreaNorm) {
-                        matchesArea = true;
-                        break;
-                    }
+                let matches = false;
+                for (let f of activeFilters.Area) {
+                    if (normalize(f) === itemAreaNorm) { matches = true; break; }
                 }
-                if (!matchesArea) return false;
+                if (!matches) return false;
             }
-
             // Sede
             if (activeFilters.Sede.size > 0 && !activeFilters.Sede.has(item.Sede)) return false;
-
             // Asesor
             if (activeFilters.Asesor.size > 0 && !activeFilters.Asesor.has(item.Asesor)) return false;
 
@@ -73,6 +123,55 @@ export default function Dashboard() {
         });
 
         setFilteredData(result);
+
+        // --- B. Calcular Opciones Disponibles (Smart Filters) ---
+        // Para cada grupo de filtros, calculamos qué opciones son válidas BASADO EN LOS OTROS filtros activos.
+        // Ejemplo: Si filtro Sede=Robledo, availableAsesores debe ser solo los de Robledo.
+        // Pero availableSedes debe seguir mostrando todas (para poder cambiar), o al menos las compatibles con los *otros* filtros (Area/Asesor).
+
+        const calculateAvailable = (excludeType) => {
+            return new Set(data.filter(item => {
+                // Aplicar todos los filtros EXCEPTO el del tipo actual 'excludeType' y Día/Search
+                // (Normalmente los filtros laterales son globales sobre la data, el día es una vista)
+                // Decisión: Smart Filters consideran Día? -> Usualmente sí, "Asesores disponibles hoy".
+                // Pero si el usuario cambia de día, las opciones cambiarían.
+                // Vamos a incluír el filtro de día para que sea "Asesores disponibles ESTE DÍA con ESTA SEDE".
+
+                if (currentDay && item.Día !== currentDay) return false;
+
+                // Aplicar Search? -> Sí, si busco "Math", solo asesores de Math.
+                if (searchTerm) {
+                    const searchString = `${item.Día} ${item.Asignatura} ${item.Asesor} ${item.Sede} ${item.Ubicación_Detalle || ''}`.toLowerCase();
+                    if (!searchString.includes(searchTerm.toLowerCase())) return false;
+                }
+
+                if (excludeType !== 'Area' && activeFilters.Area.size > 0) {
+                    const normalize = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+                    const itemAreaNorm = normalize(item.Area);
+                    let matches = false;
+                    for (let f of activeFilters.Area) if (normalize(f) === itemAreaNorm) matches = true;
+                    if (!matches) return false;
+                }
+
+                if (excludeType !== 'Sede' && activeFilters.Sede.size > 0 && !activeFilters.Sede.has(item.Sede)) return false;
+
+                if (excludeType !== 'Asesor' && activeFilters.Asesor.size > 0 && !activeFilters.Asesor.has(item.Asesor)) return false;
+
+                return true;
+            }));
+        };
+
+        // Extraer valores únicos de los sets filtrados
+        const availableSedesData = calculateAvailable('Sede');
+        const availableAreasData = calculateAvailable('Area');
+        const availableAsesoresData = calculateAvailable('Asesor');
+
+        setAvailableOptions({
+            Sede: new Set([...availableSedesData].map(d => d.Sede)),
+            Area: new Set([...availableAreasData].map(d => d.Area)),
+            Asesor: new Set([...availableAsesoresData].map(d => d.Asesor))
+        });
+
     }, [data, currentDay, searchTerm, activeFilters]);
 
     const handleFilterChange = (newFilters) => {
@@ -93,8 +192,9 @@ export default function Dashboard() {
             {/* Sidebar */}
             <aside className="w-72 flex-shrink-0 bg-white dark:bg-gray-800 shadow-lg hidden md:block">
                 <SidebarFilters
-                    allData={data}
+                    allData={data} // Pass full data if needed for static lists fallback
                     currentFilters={activeFilters}
+                    availableOptions={availableOptions} // NEW: Smart Options
                     onFilterChange={handleFilterChange}
                 />
             </aside>
