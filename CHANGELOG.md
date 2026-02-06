@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2026-02-05
+
+### Fixed
+- **Critical Auth:** Corrección de inconsistencia en clave de sesión (`user_session` -> `horarios_session`) que impedía detectar el login en el header y páginas protegidas.
+- **Critical Theme:** Activación explícita de `darkMode: 'class'` para compatibilidad con Tailwind.
+
 ## [1.3.0] - 2026-02-05
 
 ### Added

@@ -337,12 +337,12 @@ const { title = "HorariosQuedate" } = Astro.props;
             // ---------------------------------------------------------
             // Nota: La lógica real de negocio está en authService, pero esto ayuda a la UI global
             function getGlobalUser() {
-                const userStr = localStorage.getItem("user_session");
+                const userStr = localStorage.getItem("horarios_session");
                 return userStr ? JSON.parse(userStr) : null;
             }
 
             function logoutGlobal() {
-                localStorage.removeItem("user_session");
+                localStorage.removeItem("horarios_session");
                 window.location.href = "/";
             }
 

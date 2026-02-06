@@ -19,7 +19,7 @@ const uniqueAsesores = [
         // CLIENT-SIDE ROUTE PROTECTION
         // Verificar sesión antes de mostrar nada.
         (function () {
-            const session = localStorage.getItem("user_session");
+            const session = localStorage.getItem("horarios_session");
             if (!session) {
                 // No logueado. Mostrar mensaje y redirigir.
                 alert("Debes iniciar sesión para acceder a esta página");
