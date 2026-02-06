@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-02-05
+
+### Added
+- **Smart Filters:** Lógica dinámica en cascada para filtros (Sede -> Asesores/Áreas disponibles).
+- **UX:** Auto-selección de día actual y soporte para Deep Linking (e.g., `/?asesor=Juan`).
+- **Security:** Bloqueo inmediato de rutas privadas con alerta en cliente.
+
+### Fixed
+- **Theme:** Reparación del botón de modo oscuro (compatibilidad Tailwind v4).
+- **Security:** Mejoras en la gestión de seguridad de rutas.
+
 ## [1.2.0] - 2026-02-05
 
 ### Changed
