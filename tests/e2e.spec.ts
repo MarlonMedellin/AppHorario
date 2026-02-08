@@ -5,9 +5,8 @@ test('App de Horarios carga correctamente', async ({ page }) => {
     // Asume que el servidor de desarrollo está corriendo en el puerto 4321
     await page.goto('/');
 
-    // Verificar que el título contiene "Horario" o algún texto relevante
-    // Ajusta esto según el contenido real de tu aplicación
-    await expect(page).toHaveTitle(/Horario/i);
+    // Verificar que el título contiene "Dashboard" o "Colmayor"
+    await expect(page).toHaveTitle(/Dashboard|Colmayor/i);
 
     // Pausa breve para que el usuario pueda ver la página
     await page.waitForTimeout(2000);
