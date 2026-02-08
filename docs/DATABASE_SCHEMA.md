@@ -13,8 +13,8 @@
 | Ubicación_Detalle | String | Aula física o Enlace directo (URL). |
 | Estado | String | Activo, Interno, Cancelado. |
 | AUTO_ID_Unico | ID | [Día]-[Hora]-[Asesor]. |
-| Area | String | Categoría para filtros y colores. |
-| Tipo | String | 'Asesoría Académica' o 'Asesoría Personalizada'. |
+| Area | String | Categoría para filtros del Sidebar y código de colores. |
+| Tipo | String | 'Asesoría Académica' (Pública) o 'Asesoría Personalizada' (Privada/Filtrada). |
 
 ## Hoja: CONFIG
 - `Asesores`, `Correo`, `Rol` (Asesor/Psicoeducador/Ambos), `WhatsApp`, `Link_Foto`.

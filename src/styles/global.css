@@ -2,14 +2,27 @@
 @variant dark (&:where(.dark, .dark *));
 
 /* Theme Variables */
+/* Theme Variables - Pro-Academic Hybrid */
 :root {
-	--color-primary: #2563eb;
-	--color-primary-dark: #1e40af;
+  --color-brand: #273067; /* Academic Blue */
+  --color-brand-accent: #34AAE2; /* Cyan */
+  --color-bg-app: #F0F4FA; /* Soft Lavender */
+  --color-bg-card: #FFFFFF; /* White */
+  --color-text-main: #1F2937; /* Dark Grey */
+  --color-border: #E5E7EB;
 }
 
 .dark {
-	--color-primary: #3b82f6;
-	--color-primary-dark: #2563eb;
+  --color-brand: #34AAE2; /* Cyan (accessible on dark) */
+  --color-bg-app: #172139; /* Deep Navy */
+  --color-bg-card: #1F2B48; /* Light Navy */
+  --color-text-main: #F3F4F6; /* Off-white */
+  --color-border: #374151;
+}
+
+/* Base body styles using variables */
+body {
+  @apply bg-[var(--color-bg-app)] text-[var(--color-text-main)] transition-colors duration-300;
 }
 
 /* Area Colors - Standard CSS to avoid @apply issues with v4 */

@@ -1,0 +1,191 @@
+---
+import "../styles/global.css";
+import SlimSidebar from "../components/dashboard/SlimSidebar.astro";
+import TopBar from "../components/dashboard/TopBar.astro";
+import LoginModal from "../components/LoginModal.astro";
+
+const { title = "Dashboard | Colmayor" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{title}</title>
+    </head>
+    <body
+        class="bg-[var(--color-bg-app)] text-[var(--color-text-main)] transition-colors duration-300 overflow-hidden"
+    >
+        <!-- App Shell -->
+        <div class="flex h-screen w-full">
+            <!-- 1. Slim Navigation (Fixed Left) -->
+            <SlimSidebar />
+
+            <!-- 2. Main Workspace -->
+            <div
+                class="flex-1 flex flex-col ml-20 h-full overflow-hidden relative"
+            >
+                <!-- Header (Floating Search) -->
+                <TopBar />
+
+                <!-- Content Scroll Area -->
+                <main class="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth">
+                    <slot />
+                </main>
+            </div>
+        </div>
+    </body>
+
+    <!-- Footer Global -->
+    <footer
+        class="bg-[var(--color-bg-card)] border-t border-[var(--color-border)] py-8 mt-auto z-30 relative ml-20 transition-colors duration-300"
+    >
+        <div class="container mx-auto px-4">
+            <div
+                class="flex flex-col md:flex-row justify-between items-center gap-4"
+            >
+                <!-- Left: Copyright & Info -->
+                <div class="text-center md:text-left">
+                    <p
+                        class="text-sm font-semibold text-[var(--color-text-main)]"
+                    >
+                        © 2026 Marlon Arcila Vanegas.
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Construido con Astro & PowerShell. <br
+                            class="md:hidden"
+                        /> Código, Educación y Automatización.
+                    </p>
+                </div>
+
+                <!-- Center: Version -->
+                <div
+                    class="flex items-center gap-2 text-xs font-mono text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full"
+                >
+                    <svg
+                        class="w-3 h-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg
+                    >
+                    <span>v3.0.0</span>
+                </div>
+
+                <!-- Right: Social Links -->
+                <div class="flex items-center gap-4">
+                    <a
+                        href="https://github.com/MarlonMedellin"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-gray-400 hover:text-[var(--color-brand)] transition-colors"
+                        aria-label="GitHub"
+                    >
+                        <svg
+                            class="w-6 h-6"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                            ><path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                            ></path></svg
+                        >
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <LoginModal />
+
+    <script is:inline>
+        // ---------------------------------------------------------
+        // 1. Theme Logic
+        // ---------------------------------------------------------
+        const theme =
+            localStorage.getItem("theme") ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light");
+        if (theme === "dark") document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains("dark")) {
+                html.classList.remove("dark");
+                localStorage.setItem("theme", "light");
+            } else {
+                html.classList.add("dark");
+                localStorage.setItem("theme", "dark");
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 2. Auth Logic
+        // ---------------------------------------------------------
+        function getGlobalUser() {
+            const userStr = localStorage.getItem("horarios_session");
+            return userStr ? JSON.parse(userStr) : null;
+        }
+
+        function logoutGlobal() {
+            localStorage.removeItem("horarios_session");
+            window.location.href = "/";
+        }
+
+        function updateAuthUI() {
+            const user = getGlobalUser();
+            const loginBtn = document.getElementById("login-btn");
+            const userMenuBtn = document.getElementById("user-menu-btn"); // The profile trigger
+            const userName = document.getElementById("user-name");
+
+            // If TopBar has separate elements for login vs profile:
+            // We need to coordinate with TopBar IDs.
+            // Assuming TopBar will have a 'login-btn' hidden by default, and 'user-menu-btn' visible by default?
+            // Or we toggle visibility.
+
+            if (user) {
+                loginBtn?.classList.add("hidden");
+                userMenuBtn?.classList.remove("hidden");
+            } else {
+                loginBtn?.classList.remove("hidden");
+                userMenuBtn?.classList.add("hidden");
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 3. Event Listeners
+        // ---------------------------------------------------------
+        document.addEventListener("DOMContentLoaded", () => {
+            // Theme
+            // Note: TopBar might need a theme toggle button if we want one there,
+            // or we rely on system preference / previous setting.
+            // If TopBar has no toggle, we can skip binding it, or add one.
+
+            // Auth
+            document
+                .getElementById("login-btn")
+                ?.addEventListener("click", () =>
+                    window.dispatchEvent(new CustomEvent("open-login-modal")),
+                );
+
+            document
+                .getElementById("logout-btn")
+                ?.addEventListener("click", logoutGlobal);
+
+            // User Menu Dropdown (in TopBar)
+            const userMenuBtn = document.getElementById("user-menu-btn");
+            // The dropdown might be inside userMenuBtn or separate.
+            // We'll need to check TopBar structure.
+
+            // Init UI
+            updateAuthUI();
+            window.addEventListener("auth-changed", updateAuthUI);
+        });
+    </script>
+</html>

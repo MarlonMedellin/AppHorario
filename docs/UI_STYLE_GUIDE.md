@@ -4,14 +4,23 @@
 - **Fuente Principal:** 'Inter' o 'Geist Sans' (vía @fontsource/inter).
 - **Características:** Sans-serif, limpia, optimizada para legibilidad en pantallas con datos densos.
 
-## Sistema de Colores (Modo Claro/Oscuro)
+## Sistema de Colores (Variables CSS)
+El sistema utiliza variables CSS nativas para soportar temas Claro/Oscuro dinámicamente.
 
-### Colores de Superficie
-| Elemento | Modo Claro | Modo Oscuro |
-| :--- | :--- | :--- |
-| Fondo de App (Body) | #F8F9FA (Slate-50) | #0F172A (Slate-950) |
-| Cards / Sidebar | #FFFFFF (White) | #1E293B (Slate-800) |
-| Bordes de Card | #E2E8F0 (Slate-200) | #334155 (Slate-700) |
+### Paleta Principal
+| Variable | Descripción | Valor (Claro) | Valor (Oscuro) |
+| :--- | :--- | :--- | :--- |
+| `--color-brand` | Color principal (Sidebar, Botones) | #2563EB (Blue-600) | #1E40AF (Blue-800) |
+| `--color-brand-accent` | Acentos y hovers | #60A5FA (Blue-400) | #93C5FD (Blue-300) |
+| `--color-bg-app` | Fondo general | #F8FAFC (Slate-50) | #0F172A (Slate-900) |
+| `--color-bg-card` | Fondo de tarjetas/paneles | #FFFFFF | #1E293B (Slate-800) |
+| `--color-text-main` | Texto principal | #1E293B | #F1F5F9 |
+| `--color-border` | Bordes sutiles | #E2E8F0 | #334155 |
+
+### Componentes UI
+- **Glassmorphism:** Uso de `bg-white/10` y `backdrop-blur` en elementos sobre fondos brand.
+- **Sombras:** `shadow-sm` para tarjetas, `shadow-xl` para sidebar.
+- **Radios:** `rounded-2xl` para contenedores principales, `rounded-xl` para elementos internos.
 
 ### Colores de Texto
 | Elemento | Modo Claro | Modo Oscuro |

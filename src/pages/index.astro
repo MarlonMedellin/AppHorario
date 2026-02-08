@@ -1,8 +1,54 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Dashboard from "../components/Dashboard.jsx"; // Note: .jsx extension might be needed or handled by config
+import DashboardLayout from "../layouts/DashboardLayout.astro";
+import SummaryCards from "../components/dashboard/SummaryCards.astro";
+import AnnouncementCard from "../components/dashboard/AnnouncementCard.astro";
+import DashboardTable from "../components/Dashboard.jsx"; // Re-using the logic, but wrapped in new design
 ---
 
-<Layout title="Dashboard - HorariosQuedate">
-	<Dashboard client:only="react" />
-</Layout>
+<DashboardLayout
+	title="Quédate en Colmayor | Ingreso, Permanencia y Graduación"
+>
+	<div class="relative min-h-screen flex flex-col">
+		<!-- Title Section -->
+		<div class="mb-8">
+			<h1 class="text-3xl font-bold text-[var(--color-text-main)]">
+				Quédate en Colmayor
+			</h1>
+			<p class="text-gray-500 dark:text-gray-400">
+				Ingreso, Permanencia y Graduación
+			</p>
+		</div>
+
+		<!-- Top Section: Announcements -->
+		<AnnouncementCard />
+
+		<!-- Widgets Row -->
+		<SummaryCards />
+
+		<!-- Main Layout: Table Full Width -->
+		<div class="flex flex-col gap-8 mt-8 pb-12 flex-1">
+			<!-- Main Content: Schedule -->
+			<div class="w-full">
+				<div
+					class="bg-[var(--color-bg-card)] rounded-2xl shadow-sm border border-[var(--color-border)] p-6 mb-8"
+				>
+					<div class="flex items-center justify-between mb-6">
+						<h3
+							class="text-lg font-bold text-[var(--color-text-main)]"
+						>
+							Horario de Hoy
+						</h3>
+						<div class="flex gap-2">
+							<span
+								class="px-3 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full"
+								>En curso</span
+							>
+						</div>
+					</div>
+					<!-- Schedule Table -->
+					<DashboardTable client:only="react" />
+				</div>
+			</div>
+		</div>
+	</div>
+</DashboardLayout>

@@ -1,6 +1,6 @@
 ---
 import { fetchMatrizFlexible } from "../services/sheetService";
-import Layout from "../layouts/Layout.astro";
+import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DayTabs from "../components/DayTabs.astro";
 import HorarioTable from "../components/HorarioTable.astro";
 
@@ -15,13 +15,14 @@ const personalizedData = allData.filter(
 const currentDay = null;
 ---
 
-<Layout title="Asesorías Personalizadas - HorariosQuedate">
-    <div class="container mx-auto px-4 py-8">
-        <div class="mb-6">
-            <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+<DashboardLayout title="Asesorías Personalizadas - HorariosQuedate">
+    <div class="relative min-h-screen flex flex-col">
+        <!-- Title Section -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-[var(--color-text-main)]">
                 Asesorías Personalizadas
             </h1>
-            <p class="text-slate-600 dark:text-slate-400">
+            <p class="text-gray-500 dark:text-gray-400">
                 Vista de todas las asesorías personalizadas
             </p>
         </div>
@@ -30,16 +31,18 @@ const currentDay = null;
         <DayTabs activeDay={currentDay} />
 
         <!-- Results Count -->
-        <div class="mb-4 text-sm text-slate-600 dark:text-slate-400">
-            Mostrando <span class="font-bold text-blue-600 dark:text-blue-400"
+        <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+            Mostrando <span class="font-bold text-[var(--color-brand)]"
                 >{personalizedData.length}</span
             > asesorías personalizadas
         </div>
 
         <!-- Table -->
-        <HorarioTable data={personalizedData} />
+        <div class="flex-1">
+            <HorarioTable data={personalizedData} />
+        </div>
     </div>
-</Layout>
+</DashboardLayout>
 
 <script>
     import { isAuthenticated } from "../services/authService";
