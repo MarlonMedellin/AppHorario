@@ -86,8 +86,15 @@ const uniqueAsesores = [
             </div>
         </div>
 
-        <!-- Day Tabs -->
         <DayTabs activeDay={currentDay} />
+
+        <!-- Embed Data for Client Script -->
+        <div
+            id="horario-data"
+            data-json={JSON.stringify(cleanData)}
+            class="hidden"
+        >
+        </div>
 
         <!-- Table -->
         <HorarioTable data={cleanData} />
@@ -109,6 +116,12 @@ const uniqueAsesores = [
     const checkboxes = document.querySelectorAll(".asesor-checkbox");
     const clearBtn = document.getElementById("clear-asesor-filter");
 
+    // Read embedded data
+    const dataElement = document.getElementById("horario-data");
+    const allData = dataElement
+        ? JSON.parse(dataElement.dataset.json || "[]")
+        : [];
+
     // Listen for checkbox changes
     checkboxes.forEach((checkbox) => {
         checkbox.addEventListener("change", (e) => {
@@ -121,7 +134,7 @@ const uniqueAsesores = [
                 selectedAsesores.delete(asesor);
             }
 
-            applyAsesorFilter();
+            dispatchFilterEvent();
             toggleClearButton();
         });
     });
@@ -132,32 +145,27 @@ const uniqueAsesores = [
         checkboxes.forEach((cb) => {
             (cb as HTMLInputElement).checked = false;
         });
-        applyAsesorFilter();
+        dispatchFilterEvent();
         toggleClearButton();
     });
 
-    // Apply asesor filter to table rows
-    function applyAsesorFilter() {
-        const rows = document.querySelectorAll("[data-asesor]");
+    // Dispatch event to HorarioTable
+    function dispatchFilterEvent() {
+        let filteredResult = null;
 
-        rows.forEach((row) => {
-            const rowAsesor = (row as HTMLElement).dataset.asesor;
+        if (selectedAsesores.size > 0) {
+            // Filter the master data to strictly match selected advisors
+            filteredResult = allData.filter((item: any) =>
+                selectedAsesores.has(item.Asesor),
+            );
+        }
 
-            // If no filters selected, show all
-            if (selectedAsesores.size === 0) {
-                (row as HTMLElement).style.display = "";
-            } else {
-                // Show only if asesor is selected
-                if (selectedAsesores.has(rowAsesor || "")) {
-                    (row as HTMLElement).style.display = "";
-                } else {
-                    (row as HTMLElement).style.display = "none";
-                }
-            }
+        // Dispatch 'filters-applied' which HorarioTable listens to
+        // If null, it shows all (subject to Day filter). If array, it shows intersection.
+        const event = new CustomEvent("filters-applied", {
+            detail: filteredResult,
         });
-
-        // Update count
-        updateVisibleCount();
+        document.dispatchEvent(event);
     }
 
     // Toggle clear button visibility
@@ -169,22 +177,15 @@ const uniqueAsesores = [
         }
     }
 
-    // Update visible count
-    function updateVisibleCount() {
-        const rows = document.querySelectorAll("[data-asesor]");
-        let visibleCount = 0;
-
-        rows.forEach((row) => {
-            if ((row as HTMLElement).style.display !== "none") {
-                visibleCount++;
-            }
-        });
-
-        const countDisplay = document.getElementById("count-display");
-        if (countDisplay) {
-            countDisplay.textContent = `${visibleCount} Resultados`;
-        }
-    }
+    // Update visible count in UI (Label)
+    // HorarioTable updates the "Resultados" count internally?
+    // Yes, HorarioTable script has updateCount(visibleCount).
+    // But we have "count-display" in HorarioTable.astro too.
+    // The previous script had updateVisibleCount().
+    // We can rely on HorarioTable to update the count!
+    // But wait, the previous script updated "count-display".
+    // HorarioTable ALSO updates "count-display".
+    // So we don't need to do it here manually anymore.
 
     // Highlight user's own sessions
     const user = getCurrentUser();

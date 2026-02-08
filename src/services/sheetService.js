@@ -31,12 +31,32 @@ export async function fetchMatrizFlexible() {
 
         // Validar y limpiar datos
         // Se requiere que tenga al menos Asesor y Día para ser válido
-        const cleanData = rawData.filter(row =>
-            row.Asesor && row.Asesor.trim() !== '' &&
-            row.Día && row.Día.trim() !== ''
-        );
+        // Validar y limpiar datos
+        // Se requiere que tenga al menos Asesor y Día para ser válido
+        const cleanData = rawData
+            .filter(row =>
+                row.Asesor && row.Asesor.trim() !== '' &&
+                row.Día && row.Día.trim() !== ''
+            )
+            .map(row => {
+                // Robust key finding
+                const keys = Object.keys(row);
+                const areaKey = keys.find(k => k.toLowerCase().includes('rea')) || 'Area';
+                const startKey = keys.find(k => k.toLowerCase().includes('inicio')) || 'Hora_Inicio';
+                const endKey = keys.find(k => k.toLowerCase().includes('fin')) || 'Hora_Fin';
+
+                return {
+                    ...row,
+                    Area: row[areaKey],
+                    Hora_Inicio: row[startKey],
+                    Hora_Fin: row[endKey],
+                };
+            });
 
         console.log(`✅ Datos cargados: ${cleanData.length} registros desde Google Sheets`);
+        if (cleanData.length > 0) {
+            console.log("Sample mapped row:", cleanData[0]);
+        }
 
         return cleanData;
     } catch (error) {

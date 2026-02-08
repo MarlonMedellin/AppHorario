@@ -43,6 +43,14 @@ test.describe('Auditoría MVP vs Documentación', () => {
         }
 
         // 5. Navegación a Personalizados
+        // Simular autenticación para evitar redirect
+        await page.evaluate(() => {
+            localStorage.setItem('horarios_session', JSON.stringify({
+                nombre: 'Test User',
+                correo: 'test@example.com',
+                rol: 'Estudiante'
+            }));
+        });
         await page.getByRole('link', { name: 'Personalizados' }).click();
         await expect(page).toHaveURL(/.*personalizados/);
         await page.waitForTimeout(1500);

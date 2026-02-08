@@ -2,8 +2,14 @@ import { test, expect } from '@playwright/test';
 
 test('Verificar carga de datos usando variables de entorno', async ({ page, request }) => {
     // 1. Verificación básica: Cargar página principal
+    // 1. Verificación básica inicial
     const response = await page.goto('/');
     expect(response.status()).toBe(200);
+
+    // Force default day to Lunes if needed by query param or test action?
+    // Mejor: Clic en 'Lunes' para asegurar datos
+    await page.getByRole('button', { name: /Lunes/i }).click();
+
 
     // 2. Esperar a que se renderice la interfaz (lo que confirma carga de datos)
     // Si los datos no cargan, la tabla suele estar vacía o mostrar error

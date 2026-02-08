@@ -103,6 +103,12 @@ export default function Dashboard() {
                 if (!searchString.includes(searchTerm.toLowerCase())) return false;
             }
 
+            // Default Filter: Show ONLY "Asesoría Académica" unless searching
+            // Si el usuario busca algo específico, tal vez quiera ver todo?
+            // Requerimiento: "el horario principal solo debe mostrar las filas en las cuales tipo=Asesoría Académica"
+            // Asumimos que esto aplica siempre en la vista principal.
+            if (item.Tipo !== "Asesoría Académica" && item.Tipo !== "Asesoría Academica") return false;
+
             // Check Filters
             // Area
             if (activeFilters.Area.size > 0) {

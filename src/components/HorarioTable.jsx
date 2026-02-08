@@ -69,7 +69,7 @@ export default function HorarioTable({ data }) {
             {/* Desktop Table View */}
             <div className="hidden md:block bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse horario-table">
                         <thead>
                             <tr className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30">
                                 <th className="px-6 py-4 w-32">Horario</th>
