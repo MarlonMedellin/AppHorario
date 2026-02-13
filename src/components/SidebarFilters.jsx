@@ -9,7 +9,7 @@ export default function SidebarFilters({ allData, currentFilters, availableOptio
     // pero marcamos como disabled/dimmed las que no están en availableOptions.
     const allAreas = [
         "Matemáticas", "Cálculos", "Álgebra Lineal y Geometrías",
-        "Estadísticas", "Físicas", "Químicas"
+        "Estadísticas", "Físicas", "Químicas", "Humanidades", "Varias"
     ]; // Preferimos mantener este orden "lógico" si es posible.
 
     // 2. Sedes
