@@ -13,6 +13,14 @@ const areaColorMap = {
     "Quimicas": "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400",
 };
 
+// Links for virtual modalities
+const modalidadLinks = {
+    "Virtual (Meet)": "https://meet.google.com/test-meet-link",
+    "Virtual (Teams)": "https://teams.microsoft.com/test-teams-link",
+    "Virtual (Whatsapp)": "https://wa.me/573001234567",
+    "Híbrido": "https://meet.google.com/test-hibrido-link",
+};
+
 const Icons = {
     Calculator: () => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
@@ -85,8 +93,10 @@ export default function HorarioTable({ data }) {
                                 const areaClass = areaColorMap[item.Area] || "bg-slate-50 dark:bg-slate-900/20 text-slate-600 dark:text-slate-400";
                                 const isCancelado = item.Estado === "Cancelado";
                                 const isInterno = item.Estado === "Interno";
-                                const isVirtual = (item.Modalidad || "").includes("Virtual") || (item.Modalidad || "").includes("WhatsApp");
-                                const hasLink = item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http");
+                                const isVirtual = (item.Modalidad || "").includes("Virtual") || (item.Modalidad || "").includes("WhatsApp") || (item.Modalidad || "") === "Híbrido";
+                                const modalidadLink = modalidadLinks[item.Modalidad] || null;
+                                const hasLink = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) || modalidadLink;
+                                const virtualHref = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) ? item.Ubicación_Detalle : modalidadLink;
 
                                 return (
                                     <tr key={index} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -135,10 +145,13 @@ export default function HorarioTable({ data }) {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             {isVirtual && hasLink ? (
-                                                <a href={item.Ubicación_Detalle} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition-colors text-sm font-bold">
-                                                    <span>{item.Sede}</span>
-                                                    <Icons.ExternalLink />
-                                                </a>
+                                                <div className="flex items-center gap-2 justify-end">
+                                                    <span className="inline-flex px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 text-sm font-bold">{item.Sede}</span>
+                                                    <a href={virtualHref} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white transition-colors text-sm font-bold">
+                                                        <span>Consultar</span>
+                                                        <Icons.ExternalLink />
+                                                    </a>
+                                                </div>
                                             ) : isCancelado ? (
                                                 <span className="inline-flex px-3 py-1.5 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-bold">Cancelado</span>
                                             ) : (
@@ -158,8 +171,10 @@ export default function HorarioTable({ data }) {
                 {data.map((item, index) => {
                     const isCancelado = item.Estado === "Cancelado";
                     const isInterno = item.Estado === "Interno";
-                    const isVirtual = (item.Modalidad || "").includes("Virtual") || (item.Modalidad || "").includes("WhatsApp");
-                    const hasLink = item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http");
+                    const isVirtual = (item.Modalidad || "").includes("Virtual") || (item.Modalidad || "").includes("WhatsApp") || (item.Modalidad || "") === "Híbrido";
+                    const modalidadLink = modalidadLinks[item.Modalidad] || null;
+                    const hasLink = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) || modalidadLink;
+                    const virtualHref = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) ? item.Ubicación_Detalle : modalidadLink;
 
                     return (
                         <div key={index} className="relative bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-lg border border-slate-100 dark:border-slate-700">
@@ -197,8 +212,8 @@ export default function HorarioTable({ data }) {
 
                             <div className="mt-3 flex justify-end">
                                 {isVirtual && hasLink ? (
-                                    <a href={item.Ubicación_Detalle} target="_blank" rel="noopener noreferrer" className="w-full text-center py-2 rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white font-bold text-xs transition-colors flex items-center justify-center gap-1">
-                                        <span>Ir a {item.Sede}</span>
+                                    <a href={virtualHref} target="_blank" rel="noopener noreferrer" className="w-full text-center py-2 rounded-lg bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white font-bold text-xs transition-colors flex items-center justify-center gap-1">
+                                        <span>Consultar</span>
                                         <Icons.ExternalLink />
                                     </a>
                                 ) : isCancelado ? (

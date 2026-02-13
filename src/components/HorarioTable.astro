@@ -24,6 +24,14 @@ const areaColorMap: Record<string, string> = {
         "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400",
 };
 
+// Links for virtual modalities
+const modalidadLinks: Record<string, string> = {
+    "Virtual (Meet)": "https://meet.google.com/test-meet-link",
+    "Virtual (Teams)": "https://teams.microsoft.com/test-teams-link",
+    "Virtual (Whatsapp)": "https://wa.me/573001234567",
+    Híbrido: "https://meet.google.com/test-hibrido-link",
+};
+
 // Icon mapping for each area
 const getAreaIcon = (area: string) => {
     switch (area) {
@@ -109,10 +117,19 @@ const getAreaIcon = (area: string) => {
                         const isInterno = item.Estado === "Interno";
                         const isVirtual =
                             (item.Modalidad || "").includes("Virtual") ||
-                            (item.Modalidad || "").includes("WhatsApp");
+                            (item.Modalidad || "").includes("WhatsApp") ||
+                            (item.Modalidad || "") === "Híbrido";
+                        const modalidadLink =
+                            modalidadLinks[item.Modalidad] || null;
                         const hasLink =
+                            (item.Ubicación_Detalle &&
+                                item.Ubicación_Detalle.startsWith("http")) ||
+                            modalidadLink;
+                        const virtualHref =
                             item.Ubicación_Detalle &&
-                            item.Ubicación_Detalle.startsWith("http");
+                            item.Ubicación_Detalle.startsWith("http")
+                                ? item.Ubicación_Detalle
+                                : modalidadLink;
                         const areaIcon = getAreaIcon(item.Area);
 
                         return (
@@ -196,27 +213,32 @@ const getAreaIcon = (area: string) => {
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     {isVirtual && hasLink ? (
-                                        <a
-                                            href={item.Ubicación_Detalle}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition-colors text-sm font-bold"
-                                        >
-                                            <span>{item.Sede}</span>
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
+                                        <div class="flex items-center gap-2 justify-end">
+                                            <span class="inline-flex px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 text-sm font-bold">
+                                                {item.Sede}
+                                            </span>
+                                            <a
+                                                href={virtualHref}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white transition-colors text-sm font-bold"
                                             >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                                />
-                                            </svg>
-                                        </a>
+                                                <span>Consultar</span>
+                                                <svg
+                                                    class="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                                    />
+                                                </svg>
+                                            </a>
+                                        </div>
                                     ) : isCancelado ? (
                                         <span class="inline-flex px-3 py-1.5 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-bold">
                                             Cancelado
@@ -247,10 +269,18 @@ const getAreaIcon = (area: string) => {
             const isInterno = item.Estado === "Interno";
             const isVirtual =
                 (item.Modalidad || "").includes("Virtual") ||
-                (item.Modalidad || "").includes("WhatsApp");
+                (item.Modalidad || "").includes("WhatsApp") ||
+                (item.Modalidad || "") === "Híbrido";
+            const modalidadLink = modalidadLinks[item.Modalidad] || null;
             const hasLink =
+                (item.Ubicación_Detalle &&
+                    item.Ubicación_Detalle.startsWith("http")) ||
+                modalidadLink;
+            const virtualHref =
                 item.Ubicación_Detalle &&
-                item.Ubicación_Detalle.startsWith("http");
+                item.Ubicación_Detalle.startsWith("http")
+                    ? item.Ubicación_Detalle
+                    : modalidadLink;
 
             return (
                 <div
@@ -332,12 +362,12 @@ const getAreaIcon = (area: string) => {
                     <div class="mt-3 flex justify-end">
                         {isVirtual && hasLink ? (
                             <a
-                                href={item.Ubicación_Detalle}
+                                href={virtualHref}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="w-full text-center py-2 rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white font-bold text-xs transition-colors flex items-center justify-center gap-1"
+                                class="w-full text-center py-2 rounded-lg bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white font-bold text-xs transition-colors flex items-center justify-center gap-1"
                             >
-                                <span>Ir a {item.Sede}</span>
+                                <span>Consultar</span>
                                 <svg
                                     class="w-4 h-4"
                                     fill="none"

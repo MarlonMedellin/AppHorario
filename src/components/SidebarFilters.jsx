@@ -8,8 +8,10 @@ export default function SidebarFilters({ allData, currentFilters, availableOptio
     // Obtenemos TODAS las áreas posibles de la data estática o cruda para mostrar, 
     // pero marcamos como disabled/dimmed las que no están en availableOptions.
     const allAreas = [
-        "Matemáticas", "Cálculos", "Álgebra Lineal y Geometrías",
-        "Estadísticas", "Físicas", "Químicas", "Humanidades", "Varias"
+        "Matemáticas", "Álgebra Lineal y Geometrías", "Cálculos",
+        "Estadísticas", "Físicas", "Humanidades", "Investigación",
+        "Otras Administración", "Químicas", "Receso",
+        "Horas Administrativas", "Varias"
     ]; // Preferimos mantener este orden "lógico" si es posible.
 
     // 2. Sedes
