@@ -137,6 +137,8 @@ const getAreaIcon = (area: string) => {
                                 class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                                 data-dia={item.Día}
                                 data-asesor={item.Asesor}
+                                data-hora-inicio={item.Hora_Inicio}
+                                data-hora-fin={item.Hora_Fin}
                                 data-search-text={`${item.Día} ${item.Asignatura} ${item.Asesor} ${item.Sede} ${item.Ubicación_Detalle}`.toLowerCase()}
                             >
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -150,6 +152,13 @@ const getAreaIcon = (area: string) => {
                                             </span>
                                             <span class="block text-slate-500 dark:text-slate-400 text-xs">
                                                 {item.Hora_Fin}
+                                            </span>
+                                            <span class="en-curso-badge hidden inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 text-[10px] font-semibold">
+                                                <span class="relative flex h-1.5 w-1.5">
+                                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                                                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                                                </span>
+                                                En curso
                                             </span>
                                         </div>
                                     </div>
@@ -287,6 +296,8 @@ const getAreaIcon = (area: string) => {
                     class="relative bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-lg border border-slate-100 dark:border-slate-700"
                     data-dia={item.Día}
                     data-asesor={item.Asesor}
+                    data-hora-inicio={item.Hora_Inicio}
+                    data-hora-fin={item.Hora_Fin}
                     data-search-text={`${item.Día} ${item.Asignatura} ${item.Asesor} ${item.Sede} ${item.Ubicación_Detalle}`.toLowerCase()}
                 >
                     <div class="flex justify-between items-start mb-2">
@@ -303,6 +314,13 @@ const getAreaIcon = (area: string) => {
                                     {item.Hora_Fin}
                                 </span>
                             </div>
+                            <span class="en-curso-badge hidden inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 text-[10px] font-semibold">
+                                <span class="relative flex h-1.5 w-1.5">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                                </span>
+                                En curso
+                            </span>
                         </div>
                     </div>
 
@@ -472,4 +490,114 @@ const getAreaIcon = (area: string) => {
             label.textContent = day ? day : "Agenda Completa";
         }
     }
+
+    // --- Active Time Slot Highlighting ---
+    function isTimeSlotActive(horaInicio: string, horaFin: string): boolean {
+        if (!horaInicio || !horaFin) return false;
+        const now = new Date();
+        const [hI, mI = 0] = horaInicio.split(":").map(Number);
+        const [hF, mF = 0] = horaFin.split(":").map(Number);
+        if (isNaN(hI) || isNaN(hF)) return false;
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        return currentMinutes >= hI * 60 + mI && currentMinutes < hF * 60 + mF;
+    }
+
+    function getTodayName(): string {
+        const days = [
+            "Domingo",
+            "Lunes",
+            "Martes",
+            "Miércoles",
+            "Jueves",
+            "Viernes",
+            "Sábado",
+        ];
+        return days[new Date().getDay()];
+    }
+
+    const ACTIVE_CLASSES_ROW = ["bg-green-50", "dark:bg-green-900/20"];
+    const ACTIVE_CLASSES_CARD = [
+        "bg-green-50",
+        "dark:bg-green-900/20",
+        "border-green-200",
+        "dark:border-green-800",
+    ];
+    const INACTIVE_CARD_CLASSES = [
+        "bg-white",
+        "dark:bg-slate-800",
+        "border-slate-100",
+        "dark:border-slate-700",
+    ];
+
+    function highlightActiveSlots() {
+        const todayName = getTodayName();
+        const rows = document.querySelectorAll("[data-hora-inicio]");
+
+        rows.forEach((row) => {
+            const el = row as HTMLElement;
+            const dia = el.dataset.dia;
+            const horaInicio = el.dataset.horaInicio || "";
+            const horaFin = el.dataset.horaFin || "";
+            const isActive =
+                dia === todayName && isTimeSlotActive(horaInicio, horaFin);
+            const isCard = el.tagName !== "TR";
+
+            // Handle left bar indicator (desktop rows)
+            const bar = el.querySelector(".rounded-full") as HTMLElement;
+
+            if (isActive) {
+                if (isCard) {
+                    INACTIVE_CARD_CLASSES.forEach((c) =>
+                        el.classList.remove(c),
+                    );
+                    ACTIVE_CLASSES_CARD.forEach((c) => el.classList.add(c));
+                } else {
+                    ACTIVE_CLASSES_ROW.forEach((c) => el.classList.add(c));
+                    el.classList.remove(
+                        "hover:bg-slate-50",
+                        "dark:hover:bg-slate-800/50",
+                    );
+                }
+                if (bar && !bar.classList.contains("bg-red-400")) {
+                    bar.classList.remove("bg-slate-200", "dark:bg-slate-600");
+                    bar.classList.add("bg-green-500");
+                }
+                // Show "En curso" badge
+                const badge = el.querySelector(
+                    ".en-curso-badge",
+                ) as HTMLElement;
+                if (badge) {
+                    badge.classList.remove("hidden");
+                    badge.classList.add("inline-flex");
+                }
+            } else {
+                if (isCard) {
+                    ACTIVE_CLASSES_CARD.forEach((c) => el.classList.remove(c));
+                    INACTIVE_CARD_CLASSES.forEach((c) => el.classList.add(c));
+                } else {
+                    ACTIVE_CLASSES_ROW.forEach((c) => el.classList.remove(c));
+                    el.classList.add(
+                        "hover:bg-slate-50",
+                        "dark:hover:bg-slate-800/50",
+                    );
+                }
+                if (bar && !bar.classList.contains("bg-red-400")) {
+                    bar.classList.remove("bg-green-500");
+                    bar.classList.add("bg-slate-200", "dark:bg-slate-600");
+                }
+                // Hide "En curso" badge
+                const badge = el.querySelector(
+                    ".en-curso-badge",
+                ) as HTMLElement;
+                if (badge) {
+                    badge.classList.add("hidden");
+                    badge.classList.remove("inline-flex");
+                }
+            }
+        });
+    }
+
+    // Run on load and every 60 seconds
+    highlightActiveSlots();
+    setInterval(highlightActiveSlots, 60000);
 </script>

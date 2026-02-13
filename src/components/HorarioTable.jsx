@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { isTimeSlotActive, isTodayName } from "../utils/timeUtils";
 
 const areaColorMap = {
     "Matemáticas": "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
@@ -64,6 +65,13 @@ const getAreaIcon = (area) => {
 };
 
 export default function HorarioTable({ data }) {
+    // Re-render every 60s to update active time slot highlighting
+    const [, setTick] = useState(0);
+    useEffect(() => {
+        const timer = setInterval(() => setTick(t => t + 1), 60000);
+        return () => clearInterval(timer);
+    }, []);
+
     if (!data || data.length === 0) {
         return (
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg text-center border border-slate-100 dark:border-slate-700">
@@ -97,15 +105,25 @@ export default function HorarioTable({ data }) {
                                 const modalidadLink = modalidadLinks[item.Modalidad] || null;
                                 const hasLink = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) || modalidadLink;
                                 const virtualHref = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) ? item.Ubicación_Detalle : modalidadLink;
+                                const isActive = isTodayName(item.Día) && isTimeSlotActive(item.Hora_Inicio, item.Hora_Fin);
 
                                 return (
-                                    <tr key={index} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                    <tr key={index} className={`group transition-colors ${isActive ? "bg-green-50 dark:bg-green-900/20" : "hover:bg-slate-50 dark:hover:bg-slate-800/50"}`}>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
-                                                <div className={`h-10 w-1 rounded-full ${isCancelado ? "bg-red-400" : "bg-slate-200 dark:bg-slate-600"}`} />
+                                                <div className={`h-10 w-1 rounded-full ${isCancelado ? "bg-red-400" : isActive ? "bg-green-500" : "bg-slate-200 dark:bg-slate-600"}`} />
                                                 <div>
                                                     <span className="block text-slate-900 dark:text-white font-bold">{item.Hora_Inicio}</span>
                                                     <span className="block text-slate-500 dark:text-slate-400 text-xs">{item.Hora_Fin}</span>
+                                                    {isActive && (
+                                                        <span className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 text-[10px] font-semibold">
+                                                            <span className="relative flex h-1.5 w-1.5">
+                                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                                                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                                                            </span>
+                                                            En curso
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>
@@ -175,9 +193,10 @@ export default function HorarioTable({ data }) {
                     const modalidadLink = modalidadLinks[item.Modalidad] || null;
                     const hasLink = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) || modalidadLink;
                     const virtualHref = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) ? item.Ubicación_Detalle : modalidadLink;
+                    const isActive = isTodayName(item.Día) && isTimeSlotActive(item.Hora_Inicio, item.Hora_Fin);
 
                     return (
-                        <div key={index} className="relative bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-lg border border-slate-100 dark:border-slate-700">
+                        <div key={index} className={`relative rounded-2xl p-4 shadow-lg border ${isActive ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700"}`}>
                             <div className="flex justify-between items-start mb-2">
                                 <div className="flex items-center gap-2">
                                     <span className="px-2 py-1 rounded-md bg-blue-600/10 dark:bg-blue-600/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase">
@@ -188,6 +207,15 @@ export default function HorarioTable({ data }) {
                                         <span className="text-xs text-slate-500">-</span>
                                         <span className="text-xs font-medium text-slate-500">{item.Hora_Fin}</span>
                                     </div>
+                                    {isActive && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 text-[10px] font-semibold">
+                                            <span className="relative flex h-1.5 w-1.5">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                                            </span>
+                                            En curso
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 

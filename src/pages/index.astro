@@ -40,7 +40,8 @@ import DashboardTable from "../components/Dashboard.jsx"; // Re-using the logic,
 						</h3>
 						<div class="flex gap-2">
 							<span
-								class="px-3 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full"
+								id="en-curso-badge"
+								class="px-3 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full hidden"
 								>En curso</span
 							>
 						</div>
@@ -52,3 +53,52 @@ import DashboardTable from "../components/Dashboard.jsx"; // Re-using the logic,
 		</div>
 	</div>
 </DashboardLayout>
+
+<script>
+	import { isTimeSlotActive, isTodayName } from "../utils/timeUtils";
+
+	function updateBadge() {
+		const badge = document.getElementById("en-curso-badge");
+		if (!badge) return;
+
+		const rows = document.querySelectorAll(".horario-table tbody tr");
+		let hasActive = false;
+
+		rows.forEach((row) => {
+			const cells = row.querySelectorAll("td");
+			if (cells.length < 5) return;
+
+			const timeCell = cells[0];
+			const spans = timeCell.querySelectorAll("span");
+			if (spans.length < 2) return;
+
+			const horaInicio = spans[0].textContent?.trim() || "";
+			const horaFin = spans[1].textContent?.trim() || "";
+
+			const dayCell = cells[4];
+			const daySpan = dayCell.querySelector("span");
+			const dayAbbr = daySpan?.textContent?.trim() || "";
+
+			const dayMap: Record<string, string> = {
+				Dom: "Domingo",
+				Lun: "Lunes",
+				Mar: "Martes",
+				Mié: "Miércoles",
+				Jue: "Jueves",
+				Vie: "Viernes",
+				Sáb: "Sábado",
+			};
+			const dayName = dayMap[dayAbbr] || "";
+
+			if (isTodayName(dayName) && isTimeSlotActive(horaInicio, horaFin)) {
+				hasActive = true;
+			}
+		});
+
+		badge.classList.toggle("hidden", !hasActive);
+	}
+
+	// Run after React renders (small delay for client:only)
+	setTimeout(updateBadge, 2000);
+	setInterval(updateBadge, 60000);
+</script>
