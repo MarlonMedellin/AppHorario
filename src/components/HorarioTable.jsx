@@ -18,7 +18,7 @@ const areaColorMap = {
 const modalidadLinks = {
     "Virtual (Meet)": "https://meet.google.com/test-meet-link",
     "Virtual (Teams)": "https://teams.microsoft.com/test-teams-link",
-    "Virtual (Whatsapp)": "https://wa.me/573001234567",
+    "Virtual (Whatsapp)": "https://wa.me/p/9161411507267624/573013333758",
     "Híbrido": "https://meet.google.com/test-hibrido-link",
 };
 
