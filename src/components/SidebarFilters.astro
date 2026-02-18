@@ -141,10 +141,21 @@ const { allData, showOtherSedes = true } = Astro.props;
   // Dynamic lists from data source (keeps filters aligned with latest BD values)
   const HIDDEN_AREAS = new Set(["receso", "horas administrativas"]);
 
+  function getItemArea(item) {
+    return (
+      item?.Area ??
+      item?.["Área"] ??
+      item?.["Ãrea"] ??
+      item?.area ??
+      item?.AREA ??
+      ""
+    );
+  }
+
   const allAreas = [
     ...new Set(
       initialData
-        .map((d) => d.Area || d["Área"])
+        .map((d) => getItemArea(d))
         .filter((area) => typeof area === "string" && area.trim() !== ""),
     ),
   ]
@@ -170,7 +181,12 @@ const { allData, showOtherSedes = true } = Astro.props;
     ["Area", "Sede", "Asesor"].forEach((key) => {
       const paramVal = urlParams.get(key.toLowerCase());
       if (paramVal) {
-        state.filters[key].add(decodeURIComponent(paramVal));
+        const decoded = decodeURIComponent(paramVal);
+        decoded
+          .split(",")
+          .map((val) => val.trim())
+          .filter(Boolean)
+          .forEach((val) => state.filters[key].add(val));
       }
     });
 
@@ -323,8 +339,9 @@ const { allData, showOtherSedes = true } = Astro.props;
     return state.data.filter((item) => {
       // Area match (accent insensitive)
       let matchArea = state.filters.Area.size === 0;
-      if (!matchArea && item.Area) {
-        const itemAreaNorm = normalize(item.Area);
+      const itemArea = getItemArea(item);
+      if (!matchArea && itemArea) {
+        const itemAreaNorm = normalize(itemArea);
         for (const filterVal of state.filters.Area) {
           if (normalize(filterVal) === itemAreaNorm) {
             matchArea = true;
