@@ -1,38 +1,5 @@
 ---
 const { allData, showOtherSedes = true } = Astro.props;
-
-// Complete static lists
-const allAreas = [
-  "Matemáticas",
-  "Álgebra Lineal y Geometrías",
-  "Cálculos",
-  "Estadísticas",
-  "Físicas",
-  "Humanidades",
-  "Investigación",
-  "Otras Administración",
-  "Químicas",
-  "Receso",
-  "Horas Administrativas",
-  "Varias",
-];
-
-const allAsesores = [
-  "Alejandro Martínez Valencia",
-  "Alejandro Velez Fernandez",
-  "Carlos Fidel Granda Ramírez",
-  "Efraín Palacios Mosquera",
-  "Esteban Ospina Rios",
-  "Faidher Galindo",
-  "Jonathan Stiven Vargas Passo",
-  "Marlon Arcila Vanegas",
-  "Marlon Arturo Calle Vasquez",
-  "Tobias Garcia Mejia",
-  "Xiomara Quintero Gómez",
-  "Yohana Ramírez Suárez",
-];
-
-const prioritySedes = ["Robledo", "C4TA", "Virtual"];
 ---
 
 <div class="bg-white dark:bg-slate-800 h-full p-6 overflow-y-auto relative">
@@ -152,7 +119,7 @@ const prioritySedes = ["Robledo", "C4TA", "Virtual"];
   </div>
 </div>
 
-<script define:vars={{ initialData: allData }}>
+<script is:inline define:vars={{ initialData: allData }}>
   let state = {
     data: initialData,
     filters: {
@@ -171,36 +138,26 @@ const prioritySedes = ["Robledo", "C4TA", "Virtual"];
     Asesor: document.getElementById("filter-Asesor"),
   };
 
-  // Static lists
-  const staticAreas = [
-    "Matemáticas",
-    "Álgebra Lineal y Geometrías",
-    "Cálculos",
-    "Estadísticas",
-    "Físicas",
-    "Humanidades",
-    "Investigación",
-    "Otras Administración",
-    "Químicas",
-    "Receso",
-    "Horas Administrativas",
-    "Varias",
-  ];
+  // Dynamic lists from data source (keeps filters aligned with latest BD values)
+  const HIDDEN_AREAS = new Set(["receso", "horas administrativas"]);
 
-  const staticAsesores = [
-    "Alejandro Martínez Valencia",
-    "Alejandro Velez Fernandez",
-    "Carlos Fidel Granda Ramírez",
-    "Efraín Palacios Mosquera",
-    "Esteban Ospina Rios",
-    "Faidher Galindo",
-    "Jonathan Stiven Vargas Passo",
-    "Marlon Arcila Vanegas",
-    "Marlon Arturo Calle Vasquez",
-    "Tobias Garcia Mejia",
-    "Xiomara Quintero Gómez",
-    "Yohana Ramírez Suárez",
-  ];
+  const allAreas = [
+    ...new Set(
+      initialData
+        .map((d) => d.Area || d["Área"])
+        .filter((area) => typeof area === "string" && area.trim() !== ""),
+    ),
+  ]
+    .filter((area) => !HIDDEN_AREAS.has(normalize(area)))
+    .sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+
+  const allAsesores = [
+    ...new Set(
+      initialData
+        .map((d) => d.Asesor)
+        .filter((asesor) => typeof asesor === "string" && asesor.trim() !== ""),
+    ),
+  ].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
 
   // Logic for Sede
   const allSedes = [
@@ -256,11 +213,11 @@ const prioritySedes = ["Robledo", "C4TA", "Virtual"];
   }
 
   function renderAllFilters() {
-    renderStaticGroup(containers.Area, staticAreas, state.filters.Area, "Area");
+    renderStaticGroup(containers.Area, allAreas, state.filters.Area, "Area");
     renderSedeFilters(allSedes, state.filters.Sede);
     renderStaticGroup(
       containers.Asesor,
-      staticAsesores,
+      allAsesores,
       state.filters.Asesor,
       "Asesor",
     );

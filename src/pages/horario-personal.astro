@@ -3,31 +3,18 @@ import { fetchMatrizFlexible } from "../services/sheetService";
 import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DayTabs from "../components/DayTabs.astro";
 import HorarioTable from "../components/HorarioTable.astro";
+import type { ScheduleItem } from "../features/schedule/types";
+import { getUniqueAsesores } from "../features/schedule/filters";
 
 // Fetch data
-const cleanData = await fetchMatrizFlexible();
+const cleanData = (await fetchMatrizFlexible()) as ScheduleItem[];
 const currentDay = null;
 
 // Get unique asesores for filter
-const uniqueAsesores = [
-    ...new Set(cleanData.map((item) => item.Asesor).filter(Boolean)),
-].sort();
+const uniqueAsesores = getUniqueAsesores(cleanData);
 ---
 
 <DashboardLayout title="Horario Personal - HorariosQuedate">
-    <script is:inline>
-        // CLIENT-SIDE ROUTE PROTECTION
-        // Verificar sesión antes de mostrar nada.
-        (function () {
-            const session = localStorage.getItem("horarios_session");
-            if (!session) {
-                // No logueado. Mostrar mensaje y redirigir.
-                alert("Debes iniciar sesión para acceder a esta página");
-                window.location.href = "/";
-            }
-        })();
-    </script>
-
     <div class="relative min-h-screen flex flex-col">
         <!-- Title Section -->
         <div class="mb-8">
@@ -111,14 +98,10 @@ const uniqueAsesores = [
 </DashboardLayout>
 
 <script>
-    import { isAuthenticated } from "../services/authService";
+    import { requireAuth } from "../services/authService";
 
-    // Check authentication
-    if (!isAuthenticated()) {
-        // Redirect to home with message
-        alert("Debes iniciar sesión para acceder a esta página");
-        window.location.href = "/";
-    }
+    // Unified route guard: redirect unauthenticated users to login flow
+    requireAuth();
 
     // Asesor filter logic
     const selectedAsesores = new Set<string>();

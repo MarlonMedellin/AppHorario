@@ -20,7 +20,7 @@ Sistema web de gestión y consulta de horarios de asesorías académicas para el
 
 ## 🏗️ Tech Stack
 
-- **Framework:** [Astro](https://astro.build) (SSG + Islas de React)
+- **Framework:** [Astro](https://astro.build) (SSG + componentes `.astro`)
 - **Estilos:** Tailwind CSS v4 con variables CSS nativas
 - **Despliegue:** Cloudflare Pages
 - **Fuente de Datos:** Google Sheets (publicado como CSV)
@@ -155,13 +155,15 @@ El proyecto usa un sistema de autenticación simple basado en:
 /
 ├── public/              # Archivos estáticos (favicon, imágenes)
 ├── src/
-│   ├── components/      # Componentes Astro y React
+│   ├── components/      # Componentes Astro
 │   │   ├── dashboard/   # Componentes del dashboard
 │   │   ├── HorarioTable.astro
-│   │   ├── AsesoriaCard.astro
 │   │   └── LoginModal.astro
+│   ├── features/        # Módulos de dominio (schedule)
+│   │   └── schedule/
+│   │       ├── types.ts
+│   │       └── filters.ts
 │   ├── layouts/         # Layouts principales
-│   │   ├── Layout.astro
 │   │   └── DashboardLayout.astro
 │   ├── pages/           # Rutas de la aplicación
 │   │   ├── index.astro  # Dashboard principal

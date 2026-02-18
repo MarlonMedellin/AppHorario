@@ -120,12 +120,16 @@
 
 <script>
     import { fetchConfigUsers } from "../services/sheetService";
-    import { validateUser, login } from "../services/authService";
+    import {
+        validateUser,
+        login,
+        consumePostLoginRedirect,
+    } from "../services/authService";
 
     const modal = document.getElementById("login-modal");
     const backdrop = document.getElementById("modal-backdrop");
     const closeButton = document.getElementById("close-modal");
-    const form = document.getElementById("login-form");
+    const form = document.getElementById("login-form") as HTMLFormElement | null;
     const emailInput = document.getElementById(
         "email-input",
     ) as HTMLInputElement;
@@ -137,11 +141,19 @@
     const errorMessage = document.getElementById("error-message");
     const successMessage = document.getElementById("success-message");
 
-    // Open modal
-    window.addEventListener("open-login-modal", () => {
+    function openModal() {
         modal?.classList.remove("hidden");
         emailInput?.focus();
-    });
+    }
+
+    // Open modal
+    window.addEventListener("open-login-modal", openModal);
+
+    // Auto-open when user was redirected from a protected route
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("login") === "required") {
+        openModal();
+    }
 
     // Close modal
     function closeModal() {
@@ -180,7 +192,9 @@
             const configUsers = await fetchConfigUsers();
 
             // Validate user
-            const user = validateUser(email, configUsers);
+            const user = validateUser(email, configUsers) as
+                | { Asesores?: string }
+                | null;
 
             if (!user) {
                 // User not found
@@ -197,7 +211,7 @@
                 successMessage?.classList.remove("hidden");
                 const successText = successMessage?.querySelector("p");
                 if (successText) {
-                    successText.textContent = `¡Bienvenido/a, ${user.Asesores}!`;
+                    successText.textContent = `¡Bienvenido/a, ${user.Asesores || "Usuario"}!`;
                 }
 
                 // Emit auth-changed event
@@ -206,8 +220,10 @@
                 // Close modal after 1 second
                 setTimeout(() => {
                     closeModal();
-                    // Redirect to horario-personal
-                    window.location.href = "/horario-personal";
+                    // Redirect back to original protected page when available
+                    const redirectPath =
+                        consumePostLoginRedirect() || "/horario-personal";
+                    window.location.href = redirectPath;
                 }, 1000);
             }
         } catch (error) {

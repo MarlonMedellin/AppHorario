@@ -2,6 +2,7 @@
 // Manages user authentication and session
 
 const SESSION_KEY = 'horarios_session';
+const POST_LOGIN_REDIRECT_KEY = 'post_login_redirect';
 
 /**
  * Validate user email against CONFIG data
@@ -42,6 +43,7 @@ export function login(user) {
  */
 export function logout() {
     localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
     // Emit event for UI updates
     window.dispatchEvent(new CustomEvent('auth-changed'));
 }
@@ -56,7 +58,8 @@ export function getCurrentUser() {
         if (!sessionData) return null;
 
         const session = JSON.parse(sessionData);
-        return session.user || null;
+        // Backwards compatibility: previous versions stored the user object directly.
+        return session.user || session || null;
     } catch (error) {
         console.error('Error reading session:', error);
         return null;
@@ -95,4 +98,31 @@ export function canAccessPersonalizados() {
     if (!user) return false;
 
     return user.rol === 'Psicoeducador' || user.rol === 'Ambos';
+}
+
+/**
+ * Require authentication for client-only protected routes.
+ * If not authenticated, stores the current path and redirects to home.
+ * @returns {boolean} True when authenticated.
+ */
+export function requireAuth() {
+    if (typeof window === 'undefined') return true;
+    if (isAuthenticated()) return true;
+
+    const path = `${window.location.pathname}${window.location.search}`;
+    sessionStorage.setItem(POST_LOGIN_REDIRECT_KEY, path);
+    window.location.href = '/?login=required';
+    return false;
+}
+
+/**
+ * Read and consume post-login redirect path.
+ * @returns {string|null}
+ */
+export function consumePostLoginRedirect() {
+    if (typeof window === 'undefined') return null;
+    const redirectPath = sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY);
+    if (!redirectPath) return null;
+    sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
+    return redirectPath;
 }

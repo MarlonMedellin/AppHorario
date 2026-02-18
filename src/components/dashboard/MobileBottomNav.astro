@@ -103,7 +103,8 @@
         mobileProfileBtn?.addEventListener("click", () => {
             // Check if user is logged in
             const userStr = localStorage.getItem("horarios_session");
-            const user = userStr ? JSON.parse(userStr) : null;
+            const parsed = userStr ? JSON.parse(userStr) : null;
+            const user = parsed?.user || parsed;
 
             if (user) {
                 // Show logout option (could be a modal or redirect)
@@ -112,6 +113,7 @@
                 );
                 if (confirmed) {
                     localStorage.removeItem("horarios_session");
+                    sessionStorage.removeItem("post_login_redirect");
                     window.location.href = "/";
                 }
             } else {

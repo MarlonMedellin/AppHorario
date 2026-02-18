@@ -6,10 +6,19 @@ const GOOGLE_SHEET_URL = import.meta.env.PUBLIC_CSV_URL_MATRIZ;
 // URL del Google Sheet publicado como CSV - CONFIG (gid=1307903452)
 const CONFIG_SHEET_URL = import.meta.env.PUBLIC_CSV_URL_CONFIG;
 
+function logMissingPublicEnv(envName) {
+    const message = `⚠️ CONFIG: ${envName} no está definida en variables de entorno. Se usará fallback vacío.`;
+    if (import.meta.env.DEV) {
+        console.warn(message);
+        return;
+    }
+    console.error(message);
+}
+
 export async function fetchMatrizFlexible() {
     // Validar URL antes de fetch para evitar errores de compilación si falta la ENV
     if (!GOOGLE_SHEET_URL) {
-        console.error('❌ ERROR CRÍTICO: PUBLIC_CSV_URL_MATRIZ no está definida en las variables de entorno.');
+        logMissingPublicEnv('PUBLIC_CSV_URL_MATRIZ');
         return [];
     }
 
@@ -69,7 +78,7 @@ export async function fetchMatrizFlexible() {
 
 export async function fetchConfigUsers() {
     if (!CONFIG_SHEET_URL) {
-        console.error('❌ ERROR CRÍTICO: PUBLIC_CSV_URL_CONFIG no está definida en las variables de entorno.');
+        logMissingPublicEnv('PUBLIC_CSV_URL_CONFIG');
         return [];
     }
 
