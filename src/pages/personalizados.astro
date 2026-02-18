@@ -3,14 +3,14 @@ import { fetchMatrizFlexible } from "../services/sheetService";
 import DashboardLayout from "../layouts/DashboardLayout.astro";
 import DayTabs from "../components/DayTabs.astro";
 import HorarioTable from "../components/HorarioTable.astro";
-import type { ScheduleItem } from "../features/schedule/types";
-import { filterPersonalizedSchedule } from "../features/schedule/filters";
 
 // Fetch data
-const allData = (await fetchMatrizFlexible()) as ScheduleItem[];
+const allData = await fetchMatrizFlexible();
 
 // Filter only personalized sessions (Tipo === "Asesoría Personalizada")
-const personalizedData = filterPersonalizedSchedule(allData);
+const personalizedData = allData.filter(
+    (item) => item.Tipo && item.Tipo.toLowerCase().includes("personalizada"),
+);
 
 const currentDay = null;
 ---
@@ -45,8 +45,11 @@ const currentDay = null;
 </DashboardLayout>
 
 <script>
-    import { requireAuth } from "../services/authService";
+    import { isAuthenticated } from "../services/authService";
 
-    // Unified route guard: redirect unauthenticated users to login flow
-    requireAuth();
+    // Check authentication only (no role restriction)
+    if (!isAuthenticated()) {
+        alert("Debes iniciar sesión para acceder a esta página");
+        window.location.href = "/";
+    }
 </script>

@@ -1,22 +1,5 @@
 ---
-interface HorarioItem {
-    Día: string;
-    Hora_Inicio: string;
-    Hora_Fin: string;
-    Asesor: string;
-    Asignatura: string;
-    Sede: string;
-    Modalidad: string;
-    Ubicación_Detalle: string;
-    Estado: string;
-    Area: string;
-    [key: string]: string;
-}
-
-const { data: rawData } = Astro.props as { data?: unknown };
-const data: HorarioItem[] = Array.isArray(rawData)
-    ? (rawData as HorarioItem[])
-    : [];
+const { data, searchTerm = "", selectedDay = "" } = Astro.props;
 
 const areaColorMap: Record<string, string> = {
     Matemáticas:
@@ -126,7 +109,7 @@ const getAreaIcon = (area: string) => {
                 id="table-body"
             >
                 {
-                    data.map((item: HorarioItem) => {
+                    data.map((item) => {
                         const areaClass =
                             areaColorMap[item.Area] ||
                             "bg-slate-50 dark:bg-slate-900/20 text-slate-600 dark:text-slate-400";
@@ -287,7 +270,10 @@ const getAreaIcon = (area: string) => {
 <!-- Mobile Cards View -->
 <div class="md:hidden space-y-3" id="cards-container">
     {
-        data.map((item: HorarioItem) => {
+        data.map((item) => {
+            const areaClass =
+                areaColorMap[item.Area] ||
+                "bg-slate-50 dark:bg-slate-900/20 text-slate-600 dark:text-slate-400";
             const isCancelado = item.Estado === "Cancelado";
             const isInterno = item.Estado === "Interno";
             const isVirtual =
@@ -431,11 +417,9 @@ const getAreaIcon = (area: string) => {
 </div>
 
 <script>
-    type FilterItem = { Asesor: string; Día: string };
-
     let currentDay = "";
     let currentSearchTerm = "";
-    let filteredData: FilterItem[] | null = null;
+    let filteredData = null;
 
     // Listen for day changes
     document.addEventListener("day-changed", (e: any) => {
@@ -452,9 +436,7 @@ const getAreaIcon = (area: string) => {
 
     // Listen for sidebar filter changes
     document.addEventListener("filters-applied", (e: any) => {
-        filteredData = Array.isArray(e.detail)
-            ? (e.detail as FilterItem[])
-            : null;
+        filteredData = e.detail;
         applyFilters();
     });
 
@@ -478,7 +460,7 @@ const getAreaIcon = (area: string) => {
             let matchesFilters = true;
             if (filteredData !== null) {
                 matchesFilters = filteredData.some(
-                    (item: FilterItem) =>
+                    (item: any) =>
                         item.Asesor === rowAsesor && item.Día === rowDay,
                 );
             }

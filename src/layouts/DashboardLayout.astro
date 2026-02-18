@@ -6,7 +6,6 @@ import MobileBottomNav from "../components/dashboard/MobileBottomNav.astro";
 import LoginModal from "../components/LoginModal.astro";
 
 const { title = "Dashboard | Colmayor" } = Astro.props;
-const buildRef = import.meta.env.PROD ? __COMMIT_HASH__ : "DEV";
 ---
 
 <!doctype html>
@@ -81,7 +80,7 @@ const buildRef = import.meta.env.PROD ? __COMMIT_HASH__ : "DEV";
                                     d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
                                 ></path></svg
                             >
-                            <span>{`v${__APP_VERSION__} (${buildRef})`}</span>
+                            <span>v3.4.1</span>
                         </div>
 
                         <!-- Right: Social Links -->
@@ -172,18 +171,11 @@ const buildRef = import.meta.env.PROD ? __COMMIT_HASH__ : "DEV";
             // ---------------------------------------------------------
             function getGlobalUser() {
                 const userStr = localStorage.getItem("horarios_session");
-                if (!userStr) return null;
-                try {
-                    const parsed = JSON.parse(userStr);
-                    return parsed?.user || parsed;
-                } catch {
-                    return null;
-                }
+                return userStr ? JSON.parse(userStr) : null;
             }
 
             function logoutGlobal() {
                 localStorage.removeItem("horarios_session");
-                sessionStorage.removeItem("post_login_redirect");
                 window.location.href = "/";
             }
 
@@ -191,6 +183,7 @@ const buildRef = import.meta.env.PROD ? __COMMIT_HASH__ : "DEV";
                 const user = getGlobalUser();
                 const loginBtn = document.getElementById("login-btn");
                 const userMenuBtn = document.getElementById("user-menu-btn");
+                const userName = document.getElementById("user-name");
 
                 if (user) {
                     loginBtn?.classList.add("hidden");

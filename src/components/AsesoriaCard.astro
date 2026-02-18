@@ -1,0 +1,130 @@
+---
+const { item } = Astro.props;
+
+const areaColors = {
+    Matemáticas: "#3b82f6", // blue-500
+    Química: "#22c55e", // green-500
+    Física: "#a855f7", // purple-500
+    Inglés: "#ef4444", // red-500
+    Biología: "#14b8a6", // teal-500
+    Programación: "#4f46e5", // indigo-600
+    default: "#9ca3af", // gray-400
+};
+
+const borderColor = areaColors[item.Area] || areaColors["default"];
+const isCancelado = item.Estado === "Cancelado";
+const isVirtual =
+    (item.Modalidad || "").includes("Virtual") ||
+    (item.Modalidad || "").includes("WhatsApp");
+
+const bgClass = isCancelado ? "bg-red-50" : "bg-white";
+const opacityClass = isCancelado ? "opacity-80" : "";
+const overlayClass = isCancelado ? "relative overflow-hidden" : "";
+---
+
+<article
+    class={`flex flex-col h-full shadow-sm hover:shadow-lg transition-all duration-300 rounded-xl p-5 border border-gray-100 border-l-[6px] ${bgClass} ${opacityClass} ${overlayClass}`}
+    style={`border-left-color: ${borderColor};`}
+>
+    {
+        isCancelado && (
+            <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-bl">
+                CANCELADO
+            </div>
+        )
+    }
+
+    <div class="flex justify-between items-start mb-3">
+        <span
+            class="bg-gray-100 text-gray-600 text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded"
+        >
+            {item.Area}
+        </span>
+    </div>
+
+    <h3 class="text-xl font-bold text-gray-800 mb-1 leading-tight line-clamp-2">
+        {item.Asignatura || "Asesoría General"}
+    </h3>
+    <p class="text-sm text-gray-500 mb-4 font-medium">{item.Asesor}</p>
+
+    <div class="mt-auto space-y-2 text-sm text-gray-600">
+        <div class="flex items-start">
+            <svg
+                class="w-4 h-4 mr-2 mt-0.5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17.657 16.657L13 21.414a2 2 0 01-2.828 0L2 13.414a2 2 0 010-2.828l9.172-9.172a2 2 0 012.828 0l4.659 4.659"
+                ></path></svg
+            >
+            <span>
+                <span class="font-semibold block text-gray-700"
+                    >{item.Sede}</span
+                >
+                <span class="text-xs text-gray-500"
+                    >{item.Ubicación_Detalle || "Consultar en sede"}</span
+                >
+            </span>
+        </div>
+        <div class="flex items-center">
+            <svg
+                class="w-4 h-4 mr-2 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+            >
+            <span class="font-medium">
+                {item.Día} • {item.Hora_Inicio} - {item.Hora_Fin}
+            </span>
+        </div>
+    </div>
+
+    {
+        isVirtual &&
+        !isCancelado &&
+        item.Ubicación_Detalle &&
+        item.Ubicación_Detalle.startsWith("http") ? (
+            <a
+                href={item.Ubicación_Detalle}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg mt-4 transition shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+            >
+                <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                </svg>
+                Unirme
+            </a>
+        ) : isCancelado ? (
+            <button
+                disabled
+                class="block w-full text-center bg-red-100 text-red-400 font-bold py-3 px-4 rounded-lg mt-4 cursor-not-allowed border border-red-200"
+            >
+                Suspendido
+            </button>
+        ) : (
+            <div class="block w-full text-center bg-gray-50 text-gray-500 font-medium py-3 px-4 rounded-lg mt-4 border border-gray-200 text-sm">
+                Asistencia Presencial
+            </div>
+        )
+    }
+</article>

@@ -7,8 +7,8 @@ test.describe('Auditoría MVP vs Documentación', () => {
         await page.goto('/');
         await expect(page).toHaveTitle(/Dashboard|Colmayor/i);
 
-        // Verificar Sidebar principal (evitar choque con sidebar de filtros)
-        await expect(page.locator('aside.fixed.left-0.top-0')).toBeVisible();
+        // Verificar Sidebar (DashboardLayout usa SlimSidebar)
+        await expect(page.locator('aside')).toBeVisible();
 
         // 2. Tema Oscuro/Claro (UI_STYLE_GUIDE.md)
         const themeBtn = page.locator('#theme-toggle');
@@ -18,7 +18,7 @@ test.describe('Auditoría MVP vs Documentación', () => {
 
         // 3. Visualización de Datos (Index)
         // Verificar presencia de contenido principal
-        await expect(page.locator('main').first()).toBeVisible();
+        await expect(page.locator('main')).toBeVisible();
 
         // Verificar búsqueda si existe
         const searchInput = page.locator('input[type="search"], input[placeholder*="Buscar"]');

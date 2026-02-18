@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('Verificar carga de datos usando variables de entorno', async ({ page }) => {
+test('Verificar carga de datos usando variables de entorno', async ({ page, request }) => {
     // 1. Verificación básica inicial
     const response = await page.goto('/');
     expect(response?.status()).toBe(200);
