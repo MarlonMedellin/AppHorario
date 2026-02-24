@@ -66,20 +66,57 @@ export default function ShareButton({ shareUrl, shareText, captureRef, captureTi
         if (!captureRef?.current) return;
         setCapturing(true);
 
-        // Build filename before async work
+        // Build timestamp for header display and filename prefix
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        const tsDisplay = now.toLocaleString('es-CO', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: true,
+        });
+        // Filename prefix: MM-DD-HHh  e.g. "02-24-06h"
+        const tsPrefix = `${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}h`;
+
+        // Build filename: MM-DD-HHh-horario-[slug].png
         const slug = (captureTitle || 'horario')
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-        const filename = `horario-${slug}.png`;
+        const filename = `${tsPrefix}-horario-${slug}.png`;
 
         // Temporarily insert branded header into the REAL DOM node so styles are intact
         const header = document.createElement('div');
         header.id = '__share-export-header__';
-        header.style.cssText = 'padding:20px 24px 16px;border-bottom:2px solid #e2e8f0;margin-bottom:16px;background:#ffffff;font-family:Inter,system-ui,sans-serif;';
+        header.style.cssText = 'background:#ffffff;font-family:Inter,system-ui,sans-serif;padding:16px 20px 0;';
         header.innerHTML = `
-            <h1 style="margin:0 0 4px;font-size:20px;font-weight:700;color:#0f172a;line-height:1.2;">Quédate en Colmayor</h1>
-            <p style="margin:0 0 10px;font-size:12px;color:#64748b;">Ingreso, Permanencia y Graduación</p>
-            <h2 style="margin:0;font-size:14px;font-weight:600;color:#1d4ed8;">Horario de Asesorías — ${captureTitle || 'Todos los días'}</h2>
+            <!-- Row 1: 3 columns -->
+            <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:12px;">
+
+                <!-- Col 1: Logo + subtitle -->
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:18px;font-weight:700;color:#0f172a;line-height:1.2;margin-bottom:2px;">Quédate en Colmayor</div>
+                    <div style="font-size:11px;color:#64748b;">Ingreso, Permanencia y Graduación</div>
+                </div>
+
+                <!-- Col 2: Impacto Académico insight -->
+                <div style="flex:1;min-width:0;border-left:1px solid #e2e8f0;padding-left:16px;">
+                    <div style="font-size:9px;font-weight:700;color:#8b5cf6;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;">Impacto Académico</div>
+                    <div style="font-size:18px;font-weight:800;color:#0f172a;line-height:1.1;margin-bottom:1px;">80% logran aprobar</div>
+                    <div style="font-size:10px;color:#64748b;">Entre quienes asisten regularmente</div>
+                </div>
+
+                <!-- Col 3: Timestamp -->
+                <div style="flex:1;min-width:0;border-left:1px solid #e2e8f0;padding-left:16px;">
+                    <div style="font-size:9px;font-weight:700;color:#94a3b8;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Generado</div>
+                    <div style="font-size:11px;font-weight:600;color:#475569;margin-bottom:6px;">${tsDisplay}</div>
+                    <div style="font-size:10px;color:#1d4ed8;">Consulta este y más horarios en <strong>quedate.pages.dev</strong></div>
+                </div>
+            </div>
+
+            <!-- Row 2: Full-width filter bar -->
+            <div style="background:#1d4ed8;border-radius:6px;padding:8px 14px;margin-bottom:12px;">
+                <div style="font-size:13px;font-weight:600;color:#ffffff;">
+                    Horario de Asesorías — ${captureTitle || 'Todos los días'}
+                </div>
+            </div>
         `;
         captureRef.current.insertBefore(header, captureRef.current.firstChild);
 
