@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function SidebarFilters({ allData, currentFilters, availableOptions, onFilterChange, hideAdministrativeAreas }) {
+export default function SidebarFilters({ allData, currentFilters, availableOptions, onFilterChange, hideAdministrativeAreas, resultCount }) {
     const [showOtherSedes, setShowOtherSedes] = useState(false);
     const [modal, setModal] = useState({ show: false, title: "", message: "" });
 
@@ -69,7 +69,13 @@ export default function SidebarFilters({ allData, currentFilters, availableOptio
                 )}
             </div>
 
-            {/* Áreas */}
+            {/* Result count */}
+            {resultCount !== undefined && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-5 -mt-3">
+                    Mostrando <span className="font-bold text-blue-600 dark:text-blue-400">{resultCount}</span> registros
+                </p>
+            )}
+
             <div className="mb-6">
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">Áreas</h3>
                 <div className="space-y-2">

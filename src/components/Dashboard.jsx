@@ -229,11 +229,12 @@ export default function Dashboard({ hideAdministrativeAreas }) {
             {/* Sidebar */}
             <aside className="w-72 flex-shrink-0 bg-white dark:bg-gray-800 shadow-lg hidden md:block">
                 <SidebarFilters
-                    allData={data} // Pass full data if needed for static lists fallback
+                    allData={data}
                     currentFilters={activeFilters}
-                    availableOptions={availableOptions} // NEW: Smart Options
+                    availableOptions={availableOptions}
                     onFilterChange={handleFilterChange}
                     hideAdministrativeAreas={hideAdministrativeAreas}
+                    resultCount={filteredData.length}
                 />
             </aside>
 
@@ -257,12 +258,6 @@ export default function Dashboard({ hideAdministrativeAreas }) {
                     <div className="flex-shrink-0">
                         <ShareButton shareUrl={shareUrl} shareText={shareText} captureRef={captureRef} captureTitle={captureTitle} />
                     </div>
-                </div>
-
-                <div className="mb-4">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Mostrando <span className="font-bold text-blue-600 dark:text-blue-400">{filteredData.length}</span> registros
-                    </span>
                 </div>
 
                 <div ref={captureRef}>
