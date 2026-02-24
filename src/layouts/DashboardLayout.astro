@@ -183,11 +183,18 @@ const { title = "Dashboard | Colmayor" } = Astro.props;
                 const user = getGlobalUser();
                 const loginBtn = document.getElementById("login-btn");
                 const userMenuBtn = document.getElementById("user-menu-btn");
-                const userName = document.getElementById("user-name");
+                // Page-level Title Section elements (index.astro)
+                const userMenuBtnPage =
+                    document.getElementById("user-menu-btn-page");
+                const userNamePage = document.getElementById("user-name-page");
 
                 if (user) {
                     loginBtn?.classList.add("hidden");
                     userMenuBtn?.classList.remove("hidden");
+                    // Sync page-level user display with session data
+                    if (userNamePage)
+                        userNamePage.textContent =
+                            user.name || user.email || "Profesional";
                 } else {
                     loginBtn?.classList.remove("hidden");
                     userMenuBtn?.classList.add("hidden");
@@ -198,10 +205,12 @@ const { title = "Dashboard | Colmayor" } = Astro.props;
             // 3. Event Listeners
             // ---------------------------------------------------------
             document.addEventListener("DOMContentLoaded", () => {
-                // Theme toggle
+                // Theme toggle — handles all buttons with [data-theme-toggle]
                 document
-                    .getElementById("theme-toggle")
-                    ?.addEventListener("click", toggleTheme);
+                    .querySelectorAll("[data-theme-toggle]")
+                    .forEach((btn) =>
+                        btn.addEventListener("click", toggleTheme),
+                    );
 
                 // Auth
                 document

@@ -59,6 +59,7 @@ import DashboardTable from "../components/Dashboard.jsx"; // Re-using the logic,
 				>
 					<button
 						id="theme-toggle-page"
+						data-theme-toggle
 						class="p-2 text-gray-400 hover:text-[var(--color-brand)] transition rounded-full hover:bg-black/5 dark:hover:bg-white/5"
 						aria-label="Toggle theme"
 					>
@@ -136,20 +137,3 @@ import DashboardTable from "../components/Dashboard.jsx"; // Re-using the logic,
 		</div>
 	</div>
 </DashboardLayout>
-
-<script>
-	document.addEventListener("DOMContentLoaded", () => {
-		// Conectar el toggle de tema del Title Section con la lógica global
-		const toggle = document.getElementById("theme-toggle-page");
-		toggle?.addEventListener("click", () => {
-			const html = document.documentElement;
-			if (html.classList.contains("dark")) {
-				html.classList.remove("dark");
-				localStorage.setItem("theme", "light");
-			} else {
-				html.classList.add("dark");
-				localStorage.setItem("theme", "dark");
-			}
-		});
-	});
-</script>
