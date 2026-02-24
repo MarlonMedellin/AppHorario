@@ -89,14 +89,25 @@ export default function ShareButton({ shareUrl, shareText, captureRef }) {
                 type: "image/png",
             });
 
-            await navigator.share({
-                title: "Horario de Asesorías — Quédate en Colmayor",
-                text: shareText,
-                files: [file],
-            });
+            // Try file share first (Web Share API Level 2)
+            try {
+                await navigator.share({
+                    title: "Horario de Asesorías — Quédate en Colmayor",
+                    text: shareText,
+                    files: [file],
+                });
+            } catch (fileShareErr) {
+                // File share failed (common on Xiaomi/MIUI) — fall back to text share
+                console.warn("File share failed, falling back to text share:", fileShareErr);
+                await navigator.share({
+                    title: "Horario de Asesorías — Quédate en Colmayor",
+                    text: shareText,
+                    url: shareUrl,
+                });
+            }
         } catch (err) {
-            // User cancelled or browser denied — silently ignore
-            console.warn("Image share cancelled:", err);
+            // User cancelled or fatal error — silently ignore
+            console.warn("Share cancelled:", err);
         } finally {
             setCapturing(false);
         }
