@@ -234,78 +234,71 @@ export default function HorarioTable({ data }) {
 
                     return (
                         <div key={index} className={`relative rounded-2xl p-4 shadow-lg border ${isCancelado ? "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30" : isActive ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700"}`}>
-                            <div className="flex justify-between items-start mb-2">
-                                <div className="flex flex-col gap-2">
-                                    <div className="flex items-center gap-2">
-                                        <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${areaClass}`}>
-                                            {item.Area?.substring(0, 10) || "General"}
-                                        </span>
-                                        <span className="px-2 py-1 rounded-md bg-blue-600/10 dark:bg-blue-600/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase">
-                                            {item.Día?.substring(0, 3)}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="text-lg font-bold text-slate-900 dark:text-white">{item.Hora_Inicio}</span>
-                                            <span className="text-xs text-slate-500">-</span>
-                                            <span className="text-xs font-medium text-slate-500">{item.Hora_Fin}</span>
-                                            {isActive && (
-                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 text-[10px] font-semibold">
-                                                    <span className="relative flex h-1.5 w-1.5">
-                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
-                                                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
-                                                    </span>
-                                                    En curso
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight mb-3">
-                                    {item.Asignatura || "Asesoría General"}
-                                </h3>
-
-                                <div className="flex flex-wrap items-center gap-2 mt-3">
-                                    <span className={`flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium ${areaClass}`}>
-                                        {item.Area || "General"}
+                            {/* Row 1: Tags (área + día) + tiempo */}
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${areaClass}`}>
+                                        {item.Area?.substring(0, 10) || "General"}
+                                    </span>
+                                    <span className="px-2 py-1 rounded-md bg-blue-600/10 dark:bg-blue-600/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase">
+                                        {item.Día?.substring(0, 3)}
                                     </span>
                                 </div>
-
-                                <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300 pt-3 mt-3 border-t border-slate-100 dark:border-slate-700/50">
-                                    <div className="relative group/asesor flex items-center gap-1.5 truncate cursor-help">
-                                        <Icons.User />
-                                        <span className="truncate decoration-slate-300 dark:decoration-slate-600 underline-offset-4 group-hover/asesor:underline">{item.Asesor}</span>
-                                        <AsesorHoverCard name={item.Asesor} area={item.Area} cta={item.CTA} photoUrl={item.Link_Foto} />
-                                    </div>
-                                    <div className="flex items-center gap-1.5 truncate">
-                                        <Icons.Location />
-                                        <span className="truncate">{item.Ubicación_Detalle || item.Sede}</span>
-                                    </div>
-                                </div>
-
-                                {
-                                    isInterno && (
-                                        <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-2">⚠️ Solo para contratistas/docentes</p>
-                                    )
-                                }
-
-                                <div className="mt-3 flex justify-end">
-                                    {isVirtual && hasLink ? (
-                                        <a href={virtualHref} target="_blank" rel="noopener noreferrer" className="w-full text-center py-2 rounded-lg bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white font-bold text-xs transition-colors flex items-center justify-center gap-1">
-                                            <Icons.Video />
-                                            <span>Consultar</span>
-                                            <Icons.ExternalLink />
-                                        </a>
-                                    ) : isCancelado ? (
-                                        <span className="text-xs font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20 px-3 py-1 rounded-md">Cancelado</span>
-                                    ) : (
-                                        <span className={`inline-flex items-center ${isVirtual ? 'p-1.5' : 'gap-1.5 px-3 py-1.5'} text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-700 rounded-md`} title={item.Sede}>
-                                            {isVirtual ? <Icons.Video /> : <Icons.Building />}
-                                            {!isVirtual && <span>{item.Sede}</span>}
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-lg font-bold text-slate-900 dark:text-white">{item.Hora_Inicio}</span>
+                                    <span className="text-xs text-slate-500">-</span>
+                                    <span className="text-xs font-medium text-slate-500">{item.Hora_Fin}</span>
+                                    {isActive && (
+                                        <span className="inline-flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 text-[10px] font-semibold">
+                                            <span className="relative flex h-1.5 w-1.5">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                                            </span>
+                                            En curso
                                         </span>
                                     )}
                                 </div>
+                            </div>
+
+                            {/* Row 2: Título */}
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight mb-3">
+                                {item.Asignatura || "Asesoría General"}
+                            </h3>
+
+                            {/* Row 3: Asesor + Ubicación */}
+                            <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300 pt-3 border-t border-slate-100 dark:border-slate-700/50">
+                                <div className="relative group/asesor flex items-center gap-1.5 truncate cursor-help">
+                                    <Icons.User />
+                                    <span className="truncate decoration-slate-300 dark:decoration-slate-600 underline-offset-4 group-hover/asesor:underline">{item.Asesor}</span>
+                                    <AsesorHoverCard name={item.Asesor} area={item.Area} cta={item.CTA} photoUrl={item.Link_Foto} />
+                                </div>
+                                <div className="flex items-center gap-1.5 truncate">
+                                    <Icons.Location />
+                                    <span className="truncate">{item.Ubicación_Detalle || item.Sede}</span>
+                                </div>
+                            </div>
+
+                            {isInterno && (
+                                <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-2">⚠️ Solo para contratistas/docentes</p>
+                            )}
+
+                            {/* Row 4: Sede / Acción */}
+                            <div className="mt-3 flex justify-end">
+                                {isVirtual && hasLink ? (
+                                    <a href={virtualHref} target="_blank" rel="noopener noreferrer" className="w-full text-center py-2 rounded-lg bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white font-bold text-xs transition-colors flex items-center justify-center gap-1">
+                                        <Icons.Video />
+                                        <span>Consultar</span>
+                                        <Icons.ExternalLink />
+                                    </a>
+                                ) : isCancelado ? (
+                                    <span className="text-xs font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20 px-3 py-1 rounded-md">Cancelado</span>
+                                ) : (
+                                    <span className={`inline-flex items-center ${isVirtual ? 'p-1.5' : 'gap-1.5 px-3 py-1.5'} text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-700 rounded-md`} title={item.Sede}>
+                                        {isVirtual ? <Icons.Video /> : <Icons.Building />}
+                                        {!isVirtual && <span>{item.Sede}</span>}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     );
