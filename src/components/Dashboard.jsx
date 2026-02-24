@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { fetchMatrizFlexible } from '../services/sheetService';
 import HorarioTable from './HorarioTable';
 import SidebarFilters from './SidebarFilters';
 import DayTabs from './DayTabs';
+import ShareButton from './ShareButton';
 
 export default function Dashboard({ hideAdministrativeAreas }) {
     const [data, setData] = useState([]);
@@ -184,6 +185,29 @@ export default function Dashboard({ hideAdministrativeAreas }) {
         setActiveFilters(newFilters);
     };
 
+    // Build a shareable deep-link URL from the current filter state
+    const { shareUrl, shareText } = useMemo(() => {
+        const base = typeof window !== 'undefined'
+            ? window.location.origin + window.location.pathname
+            : 'https://quedate.pages.dev/';
+        const params = new URLSearchParams();
+        if (currentDay) params.set('dia', currentDay);
+        activeFilters.Area.forEach(a => params.set('area', a));
+        activeFilters.Sede.forEach(s => params.set('sede', s));
+        activeFilters.Asesor.forEach(a => params.set('asesor', a));
+        const qs = params.toString();
+        const url = qs ? `${base}?${qs}` : base;
+
+        const parts = [];
+        if (currentDay) parts.push(currentDay);
+        if (activeFilters.Area.size) parts.push([...activeFilters.Area].join(', '));
+        if (activeFilters.Asesor.size) parts.push([...activeFilters.Asesor].join(', '));
+        const context = parts.length ? ` — ${parts.join(' | ')}` : '';
+        const text = `📅 Horario de Asesorías${context}\nQuédate en Colmayor`;
+
+        return { shareUrl: url, shareText: text };
+    }, [currentDay, activeFilters]);
+
     if (loading) {
         return (
             <div className="flex h-64 items-center justify-center">
@@ -220,8 +244,11 @@ export default function Dashboard({ hideAdministrativeAreas }) {
 
                 <DayTabs activeDay={currentDay} onDayChange={setCurrentDay} />
 
-                <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                    Mostrando <span className="font-bold text-blue-600 dark:text-blue-400">{filteredData.length}</span> registros
+                <div className="mb-4 flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Mostrando <span className="font-bold text-blue-600 dark:text-blue-400">{filteredData.length}</span> registros
+                    </span>
+                    <ShareButton shareUrl={shareUrl} shareText={shareText} />
                 </div>
 
                 <HorarioTable data={filteredData} />
