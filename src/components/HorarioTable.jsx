@@ -49,6 +49,12 @@ const Icons = {
     ),
     ExternalLink: () => (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+    ),
+    Video: () => (
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+    ),
+    Building: () => (
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
     )
 };
 
@@ -62,6 +68,28 @@ const getAreaIcon = (area) => {
         case "Químicas": case "Quimicas": return <Icons.Flask />;
         default: return null;
     }
+};
+
+const AsesorHoverCard = ({ name, area, cta, photoUrl }) => {
+    const finalCta = cta || "¡Asegura tu éxito en esta sesión!";
+    const avatarUrl = photoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'A')}&background=random&color=fff&size=80`;
+
+    return (
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4 opacity-0 invisible group-hover/asesor:opacity-100 group-hover/asesor:visible transition-all duration-300 z-50 transform origin-bottom scale-95 group-hover/asesor:scale-100 pointer-events-none">
+            <div className="flex flex-col items-center text-center">
+                <img src={avatarUrl} alt={name} className="w-16 h-16 rounded-full shadow-md mb-3 object-cover border-2 border-slate-100 dark:border-slate-700" />
+                <h4 className="font-bold text-slate-900 dark:text-white text-md mb-1">{name}</h4>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium mb-3">
+                    Asesor de {area || "Área General"}
+                </span>
+                <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg w-full">
+                    {finalCta}
+                </p>
+            </div>
+            {/* Tooltip triangle */}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white dark:border-t-slate-800 drop-shadow-sm"></div>
+        </div>
+    );
 };
 
 export default function HorarioTable({ data }) {
@@ -136,9 +164,11 @@ export default function HorarioTable({ data }) {
                                                     <h4 className="font-bold text-slate-900 dark:text-white text-sm">
                                                         {item.Asignatura || "Asesoría General"}
                                                     </h4>
-                                                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium">
-                                                        {item.Modalidad || "Presencial"}
-                                                    </span>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${areaClass}`}>
+                                                            {item.Area || "General"}
+                                                        </span>
+                                                    </div>
                                                     {isInterno && (
                                                         <span className="block text-xs text-yellow-700 dark:text-yellow-400 mt-1">⚠️ Solo contratistas/docentes</span>
                                                     )}
@@ -146,9 +176,10 @@ export default function HorarioTable({ data }) {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
+                                            <div className="relative group/asesor inline-flex items-center gap-2 cursor-help">
                                                 <Icons.User />
-                                                <span className="text-slate-700 dark:text-slate-300 font-medium text-sm">{item.Asesor}</span>
+                                                <span className="text-slate-700 dark:text-slate-300 font-medium text-sm decoration-slate-300 dark:decoration-slate-600 underline-offset-4 group-hover/asesor:underline">{item.Asesor}</span>
+                                                <AsesorHoverCard name={item.Asesor} area={item.Area} cta={item.CTA} photoUrl={item.Link_Foto} />
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -162,18 +193,23 @@ export default function HorarioTable({ data }) {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            {isVirtual && hasLink ? (
+                                            {isCancelado ? (
+                                                <span className="inline-flex px-3 py-1.5 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-bold">Cancelado</span>
+                                            ) : isVirtual && hasLink ? (
                                                 <div className="flex items-center gap-2 justify-end">
-                                                    <span className="inline-flex px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 text-sm font-bold">{item.Sede}</span>
+                                                    <span className="inline-flex p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500" title={item.Sede}>
+                                                        <Icons.Video />
+                                                    </span>
                                                     <a href={virtualHref} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white transition-colors text-sm font-bold">
                                                         <span>Consultar</span>
                                                         <Icons.ExternalLink />
                                                     </a>
                                                 </div>
-                                            ) : isCancelado ? (
-                                                <span className="inline-flex px-3 py-1.5 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-bold">Cancelado</span>
                                             ) : (
-                                                <span className="inline-flex px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 text-sm font-bold">{item.Sede}</span>
+                                                <span className={`inline-flex items-center ${isVirtual ? 'p-1.5' : 'gap-1.5 px-3 py-1.5'} rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 text-sm font-bold`} title={item.Sede}>
+                                                    {isVirtual ? <Icons.Video /> : <Icons.Building />}
+                                                    {!isVirtual && <span>{item.Sede}</span>}
+                                                </span>
                                             )}
                                         </td>
                                     </tr>
@@ -187,6 +223,7 @@ export default function HorarioTable({ data }) {
             {/* Mobile Cards View */}
             <div className="md:hidden space-y-3">
                 {data.map((item, index) => {
+                    const areaClass = areaColorMap[item.Area] || "bg-slate-50 dark:bg-slate-900/20 text-slate-600 dark:text-slate-400";
                     const isCancelado = item.Estado === "Cancelado";
                     const isInterno = item.Estado === "Interno";
                     const isVirtual = (item.Modalidad || "").includes("Virtual") || (item.Modalidad || "").includes("WhatsApp") || (item.Modalidad || "") === "Híbrido";
@@ -198,57 +235,81 @@ export default function HorarioTable({ data }) {
                     return (
                         <div key={index} className={`relative rounded-2xl p-4 shadow-lg border ${isCancelado ? "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30" : isActive ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700"}`}>
                             <div className="flex justify-between items-start mb-2">
-                                <div className="flex items-center gap-2">
-                                    <span className="px-2 py-1 rounded-md bg-blue-600/10 dark:bg-blue-600/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase">
-                                        {item.Día?.substring(0, 3)}
-                                    </span>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-lg font-bold text-slate-900 dark:text-white">{item.Hora_Inicio}</span>
-                                        <span className="text-xs text-slate-500">-</span>
-                                        <span className="text-xs font-medium text-slate-500">{item.Hora_Fin}</span>
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${areaClass}`}>
+                                            {item.Area?.substring(0, 10) || "General"}
+                                        </span>
+                                        <span className="px-2 py-1 rounded-md bg-blue-600/10 dark:bg-blue-600/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase">
+                                            {item.Día?.substring(0, 3)}
+                                        </span>
                                     </div>
-                                    {isActive && (
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 text-[10px] font-semibold">
-                                            <span className="relative flex h-1.5 w-1.5">
-                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
-                                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
-                                            </span>
-                                            En curso
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-lg font-bold text-slate-900 dark:text-white">{item.Hora_Inicio}</span>
+                                            <span className="text-xs text-slate-500">-</span>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-lg font-bold text-slate-900 dark:text-white">{item.Hora_Inicio}</span>
+                                                <span className="text-xs text-slate-500">-</span>
+                                                <span className="text-xs font-medium text-slate-500">{item.Hora_Fin}</span>
+                                            </div>
+                                            {isActive && (
+                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 text-[10px] font-semibold">
+                                                    <span className="relative flex h-1.5 w-1.5">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                                                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                                                    </span>
+                                                    En curso
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight mb-3">
+                                    {item.Asignatura || "Asesoría General"}
+                                </h3>
+
+                                <div className="flex flex-wrap items-center gap-2 mt-3">
+                                    <span className={`flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium ${areaClass}`}>
+                                        {item.Area || "General"}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300 pt-3 mt-3 border-t border-slate-100 dark:border-slate-700/50">
+                                    <div className="relative group/asesor flex items-center gap-1.5 truncate cursor-help">
+                                        <Icons.User />
+                                        <span className="truncate decoration-slate-300 dark:decoration-slate-600 underline-offset-4 group-hover/asesor:underline">{item.Asesor}</span>
+                                        <AsesorHoverCard name={item.Asesor} area={item.Area} cta={item.CTA} photoUrl={item.Link_Foto} />
+                                    </div>
+                                    <div className="flex items-center gap-1.5 truncate">
+                                        <Icons.Location />
+                                        <span className="truncate">{item.Ubicación_Detalle || item.Sede}</span>
+                                    </div>
+                                </div>
+
+                                {
+                                    isInterno && (
+                                        <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-2">⚠️ Solo para contratistas/docentes</p>
+                                    )
+                                }
+
+                                <div className="mt-3 flex justify-end">
+                                    {isVirtual && hasLink ? (
+                                        <a href={virtualHref} target="_blank" rel="noopener noreferrer" className="w-full text-center py-2 rounded-lg bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white font-bold text-xs transition-colors flex items-center justify-center gap-1">
+                                            <Icons.Video />
+                                            <span>Consultar</span>
+                                            <Icons.ExternalLink />
+                                        </a>
+                                    ) : isCancelado ? (
+                                        <span className="text-xs font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20 px-3 py-1 rounded-md">Cancelado</span>
+                                    ) : (
+                                        <span className={`inline-flex items-center ${isVirtual ? 'p-1.5' : 'gap-1.5 px-3 py-1.5'} text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-700 rounded-md`} title={item.Sede}>
+                                            {isVirtual ? <Icons.Video /> : <Icons.Building />}
+                                            {!isVirtual && <span>{item.Sede}</span>}
                                         </span>
                                     )}
                                 </div>
-                            </div>
-
-                            <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight mb-3">
-                                {item.Asignatura || "Asesoría General"}
-                            </h3>
-
-                            <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300 pt-3 border-t border-slate-100 dark:border-slate-700/50">
-                                <div className="flex items-center gap-1.5 truncate">
-                                    <Icons.User />
-                                    <span className="truncate">{item.Asesor}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 truncate">
-                                    <Icons.Location />
-                                    <span className="truncate">{item.Ubicación_Detalle || item.Sede}</span>
-                                </div>
-                            </div>
-
-                            {isInterno && (
-                                <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-2">⚠️ Solo para contratistas/docentes</p>
-                            )}
-
-                            <div className="mt-3 flex justify-end">
-                                {isVirtual && hasLink ? (
-                                    <a href={virtualHref} target="_blank" rel="noopener noreferrer" className="w-full text-center py-2 rounded-lg bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white font-bold text-xs transition-colors flex items-center justify-center gap-1">
-                                        <span>Consultar</span>
-                                        <Icons.ExternalLink />
-                                    </a>
-                                ) : isCancelado ? (
-                                    <span className="text-xs font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20 px-3 py-1 rounded-md">Cancelado</span>
-                                ) : (
-                                    <span className="text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-md">{item.Sede}</span>
-                                )}
                             </div>
                         </div>
                     );

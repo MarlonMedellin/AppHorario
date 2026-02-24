@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 
-export default function SidebarFilters({ allData, currentFilters, availableOptions, onFilterChange }) {
+export default function SidebarFilters({ allData, currentFilters, availableOptions, onFilterChange, hideAdministrativeAreas }) {
     const [showOtherSedes, setShowOtherSedes] = useState(false);
     const [modal, setModal] = useState({ show: false, title: "", message: "" });
 
     // 1. Áreas (Dinámicas a partir de la data completa + disponibilidad)
-    // Obtenemos TODAS las áreas posibles de la data estática o cruda para mostrar, 
-    // pero marcamos como disabled/dimmed las que no están en availableOptions.
-    const allAreas = [
+    let allAreas = [
         "Matemáticas", "Álgebra Lineal y Geometrías", "Cálculos",
         "Estadísticas", "Físicas", "Humanidades", "Investigación",
         "Otras Administración", "Químicas", "Receso",
         "Horas Administrativas", "Varias"
-    ]; // Preferimos mantener este orden "lógico" si es posible.
+    ];
+
+    if (hideAdministrativeAreas) {
+        allAreas = allAreas.filter(a => a !== "Receso" && a !== "Horas Administrativas");
+    }
 
     // 2. Sedes
     // Prioridad visual

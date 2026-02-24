@@ -4,7 +4,7 @@ import HorarioTable from './HorarioTable';
 import SidebarFilters from './SidebarFilters';
 import DayTabs from './DayTabs';
 
-export default function Dashboard() {
+export default function Dashboard({ hideAdministrativeAreas }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filteredData, setFilteredData] = useState([]);
@@ -202,6 +202,7 @@ export default function Dashboard() {
                     currentFilters={activeFilters}
                     availableOptions={availableOptions} // NEW: Smart Options
                     onFilterChange={handleFilterChange}
+                    hideAdministrativeAreas={hideAdministrativeAreas}
                 />
             </aside>
 

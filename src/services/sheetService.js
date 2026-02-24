@@ -14,8 +14,12 @@ export async function fetchMatrizFlexible() {
     }
 
     try {
+        // Agregar timestamp para evitar que el navegador use la versión en caché
+        const timestamp = new Date().getTime();
+        const fetchUrl = `${GOOGLE_SHEET_URL}${GOOGLE_SHEET_URL.includes('?') ? '&' : '?'}t=${timestamp}`;
+
         // Fetch desde Google Sheets
-        const response = await fetch(GOOGLE_SHEET_URL);
+        const response = await fetch(fetchUrl);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -44,12 +48,16 @@ export async function fetchMatrizFlexible() {
                 const areaKey = keys.find(k => k.toLowerCase().includes('rea')) || 'Area';
                 const startKey = keys.find(k => k.toLowerCase().includes('inicio')) || 'Hora_Inicio';
                 const endKey = keys.find(k => k.toLowerCase().includes('fin')) || 'Hora_Fin';
+                const ctaKey = keys.find(k => k.toLowerCase() === 'cta') || 'CTA';
+                const fotoKey = keys.find(k => k.toLowerCase().includes('foto')) || 'Link_Foto';
 
                 return {
                     ...row,
                     Area: row[areaKey],
                     Hora_Inicio: row[startKey],
                     Hora_Fin: row[endKey],
+                    CTA: row[ctaKey],
+                    Link_Foto: row[fotoKey],
                 };
             });
 
@@ -74,7 +82,11 @@ export async function fetchConfigUsers() {
     }
 
     try {
-        const response = await fetch(CONFIG_SHEET_URL);
+        // Agregar timestamp para evitar que el navegador use la versión en caché
+        const timestamp = new Date().getTime();
+        const fetchUrl = `${CONFIG_SHEET_URL}${CONFIG_SHEET_URL.includes('?') ? '&' : '?'}t=${timestamp}`;
+
+        const response = await fetch(fetchUrl);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

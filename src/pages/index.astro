@@ -47,7 +47,10 @@ import DashboardTable from "../components/Dashboard.jsx"; // Re-using the logic,
 						</div>
 					</div>
 					<!-- Schedule Table -->
-					<DashboardTable client:only="react" />
+					<DashboardTable
+						client:only="react"
+						hideAdministrativeAreas={true}
+					/>
 				</div>
 			</div>
 		</div>
