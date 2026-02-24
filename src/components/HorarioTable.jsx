@@ -235,29 +235,31 @@ export default function HorarioTable({ data }) {
                     return (
                         <div key={index} className={`relative rounded-2xl p-4 shadow-lg border ${isCancelado ? "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30" : isActive ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700"}`}>
 
-                            {/* Row 1: Tags (área + día) + tiempo */}
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                    <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${areaClass}`}>
-                                        {item.Area?.substring(0, 10) || "General"}
-                                    </span>
-                                    <span className="px-2 py-1 rounded-md bg-blue-600/10 dark:bg-blue-600/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase">
-                                        {item.Día?.substring(0, 3)}
-                                    </span>
-                                </div>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-lg font-bold text-slate-900 dark:text-white">{item.Hora_Inicio}</span>
-                                    <span className="text-xs text-slate-500">-</span>
-                                    <span className="text-xs font-medium text-slate-500">{item.Hora_Fin}</span>
-                                    {isActive && (
-                                        <span className="inline-flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 text-[10px] font-semibold">
-                                            <span className="relative flex h-1.5 w-1.5">
-                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
-                                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
-                                            </span>
-                                            En curso
+                            {/* Row 1: Tags + tiempo en dos líneas */}
+                            <div className="flex flex-col gap-1 mb-2">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${areaClass}`}>
+                                            {item.Area?.substring(0, 10) || "General"}
                                         </span>
-                                    )}
+                                        <span className="px-2 py-1 rounded-md bg-blue-600/10 dark:bg-blue-600/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase">
+                                            {item.Día?.substring(0, 3)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-sm font-bold text-slate-900 dark:text-white">{item.Hora_Inicio}</span>
+                                        <span className="text-xs text-slate-500">–</span>
+                                        <span className="text-xs font-medium text-slate-500">{item.Hora_Fin}</span>
+                                        {isActive && (
+                                            <span className="inline-flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 text-[10px] font-semibold">
+                                                <span className="relative flex h-1.5 w-1.5">
+                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                                                </span>
+                                                En curso
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 

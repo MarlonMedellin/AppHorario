@@ -225,7 +225,7 @@ export default function Dashboard({ hideAdministrativeAreas }) {
     }
 
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen w-full">
             {/* Sidebar */}
             <aside className="w-72 flex-shrink-0 bg-white dark:bg-gray-800 shadow-lg hidden md:block">
                 <SidebarFilters
@@ -239,7 +239,7 @@ export default function Dashboard({ hideAdministrativeAreas }) {
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 p-6">
+            <div className="flex-1 min-w-0 p-2 md:p-6">
                 <div className="mb-6">
                     <input
                         type="text"
