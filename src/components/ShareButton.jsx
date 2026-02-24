@@ -16,15 +16,42 @@ const ShareIcon = () => (
     </svg>
 );
 
-export default function ShareButton({ shareUrl, shareText }) {
+// Camera / image icon
+const ImageIcon = () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+        />
+    </svg>
+);
+
+// Spinner for loading state
+const Spinner = () => (
+    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+    </svg>
+);
+
+export default function ShareButton({ shareUrl, shareText, captureRef }) {
     const [canShare, setCanShare] = useState(false);
+    const [canShareFiles, setCanShareFiles] = useState(false);
+    const [capturing, setCapturing] = useState(false);
     const [shared, setShared] = useState(false);
 
     useEffect(() => {
-        // Only show native share button if the API is supported (typically mobile)
-        setCanShare(typeof navigator !== "undefined" && !!navigator.share);
+        const supportsShare = typeof navigator !== "undefined" && !!navigator.share;
+        setCanShare(supportsShare);
+
+        // Check Web Share API Level 2 (file sharing support)
+        if (supportsShare && navigator.canShare) {
+            // Probe with a dummy PNG file
+            const testFile = new File([""], "test.png", { type: "image/png" });
+            setCanShareFiles(navigator.canShare({ files: [testFile] }));
+        }
     }, []);
 
+    // ── Native text share ─────────────────────────────────────────────────────
     const handleNativeShare = async () => {
         try {
             await navigator.share({
@@ -34,17 +61,54 @@ export default function ShareButton({ shareUrl, shareText }) {
             });
             setShared(true);
             setTimeout(() => setShared(false), 2000);
-        } catch (err) {
-            // User cancelled or share failed — silently ignore
+        } catch {
+            // User cancelled — silently ignore
         }
     };
 
+    // ── Image capture + share ─────────────────────────────────────────────────
+    const handleImageShare = async () => {
+        if (!captureRef?.current) return;
+        setCapturing(true);
+        try {
+            // Lazy-load html2canvas only when needed (keeps initial bundle small)
+            const html2canvas = (await import("html2canvas")).default;
+
+            const canvas = await html2canvas(captureRef.current, {
+                useCORS: true,
+                backgroundColor: "#ffffff",
+                scale: 2, // 2× for retina-quality output
+                logging: false,
+            });
+
+            const blob = await new Promise((resolve) =>
+                canvas.toBlob(resolve, "image/png")
+            );
+
+            const file = new File([blob], "horario-asesorias.png", {
+                type: "image/png",
+            });
+
+            await navigator.share({
+                title: "Horario de Asesorías — Quédate en Colmayor",
+                text: shareText,
+                files: [file],
+            });
+        } catch (err) {
+            // User cancelled or browser denied — silently ignore
+            console.warn("Image share cancelled:", err);
+        } finally {
+            setCapturing(false);
+        }
+    };
+
+    // ── WhatsApp deep link ────────────────────────────────────────────────────
     const whatsappMessage = encodeURIComponent(`${shareText}\n${shareUrl}`);
     const whatsappHref = `https://wa.me/?text=${whatsappMessage}`;
 
     return (
         <div className="flex items-center gap-2">
-            {/* Web Share API — only rendered when supported (mobile) */}
+            {/* Native text share — mobile only */}
             {canShare && (
                 <button
                     onClick={handleNativeShare}
@@ -53,6 +117,19 @@ export default function ShareButton({ shareUrl, shareText }) {
                 >
                     <ShareIcon />
                     <span>{shared ? "¡Listo!" : "Compartir"}</span>
+                </button>
+            )}
+
+            {/* Image share — only when Web Share API Level 2 + captureRef available */}
+            {canShareFiles && captureRef && (
+                <button
+                    onClick={handleImageShare}
+                    disabled={capturing}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors text-xs font-semibold disabled:opacity-60"
+                    title="Compartir como imagen"
+                >
+                    {capturing ? <Spinner /> : <ImageIcon />}
+                    <span>{capturing ? "Capturando..." : "Imagen"}</span>
                 </button>
             )}
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { fetchMatrizFlexible } from '../services/sheetService';
 import HorarioTable from './HorarioTable';
 import SidebarFilters from './SidebarFilters';
@@ -9,6 +9,7 @@ export default function Dashboard({ hideAdministrativeAreas }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filteredData, setFilteredData] = useState([]);
+    const captureRef = useRef(null);
 
     // Mapeo de días (0=Domingo, 1=Lunes...)
     const daysMap = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -253,10 +254,12 @@ export default function Dashboard({ hideAdministrativeAreas }) {
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                         Mostrando <span className="font-bold text-blue-600 dark:text-blue-400">{filteredData.length}</span> registros
                     </span>
-                    <ShareButton shareUrl={shareUrl} shareText={shareText} />
+                    <ShareButton shareUrl={shareUrl} shareText={shareText} captureRef={captureRef} />
                 </div>
 
-                <HorarioTable data={filteredData} />
+                <div ref={captureRef}>
+                    <HorarioTable data={filteredData} />
+                </div>
             </div>
         </div>
     );
