@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { fetchMatrizFlexible } from '../services/sheetService';
 import HorarioTable from './HorarioTable';
 import SidebarFilters from './SidebarFilters';
 import DayTabs from './DayTabs';
+import ShareButton from './ShareButton';
 
 export default function Dashboard({ hideAdministrativeAreas }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filteredData, setFilteredData] = useState([]);
+    const captureRef = useRef(null);
 
     // Mapeo de días (0=Domingo, 1=Lunes...)
     const daysMap = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -76,11 +78,16 @@ export default function Dashboard({ hideAdministrativeAreas }) {
                     if (match) initialFilters.Area.add(match.Area);
                     hasDeepLinks = true;
                 }
+                if (params.has('dia')) {
+                    const diaParam = params.get('dia');
+                    // Find exact day match (case-insensitive) from the data
+                    const match = publicData.find(d => d.Día.toLowerCase() === diaParam.toLowerCase());
+                    if (match) setCurrentDay(match.Día);
+                    hasDeepLinks = true;
+                }
 
                 if (hasDeepLinks) {
                     setActiveFilters(initialFilters);
-                    // Si aplicamos deep link, el día tal vez deba resetearse o mantenerse?
-                    // Mantenemos Auto-Day salvo que no haya resultados, pero dejemoslo así.
                 }
 
             } catch (error) {
@@ -184,6 +191,29 @@ export default function Dashboard({ hideAdministrativeAreas }) {
         setActiveFilters(newFilters);
     };
 
+    // Build a shareable deep-link URL from the current filter state
+    const { shareUrl, shareText } = useMemo(() => {
+        const base = typeof window !== 'undefined'
+            ? window.location.origin + window.location.pathname
+            : 'https://quedate.pages.dev/';
+        const params = new URLSearchParams();
+        if (currentDay) params.set('dia', currentDay);
+        activeFilters.Area.forEach(a => params.set('area', a));
+        activeFilters.Sede.forEach(s => params.set('sede', s));
+        activeFilters.Asesor.forEach(a => params.set('asesor', a));
+        const qs = params.toString();
+        const url = qs ? `${base}?${qs}` : base;
+
+        const parts = [];
+        if (currentDay) parts.push(currentDay);
+        if (activeFilters.Area.size) parts.push([...activeFilters.Area].join(', '));
+        if (activeFilters.Asesor.size) parts.push([...activeFilters.Asesor].join(', '));
+        const context = parts.length ? ` — ${parts.join(' | ')}` : '';
+        const text = `Horario de Asesorías${context}\nQuédate en Colmayor`;
+
+        return { shareUrl: url, shareText: text };
+    }, [currentDay, activeFilters]);
+
     if (loading) {
         return (
             <div className="flex h-64 items-center justify-center">
@@ -220,11 +250,16 @@ export default function Dashboard({ hideAdministrativeAreas }) {
 
                 <DayTabs activeDay={currentDay} onDayChange={setCurrentDay} />
 
-                <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                    Mostrando <span className="font-bold text-blue-600 dark:text-blue-400">{filteredData.length}</span> registros
+                <div className="mb-4 flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Mostrando <span className="font-bold text-blue-600 dark:text-blue-400">{filteredData.length}</span> registros
+                    </span>
+                    <ShareButton shareUrl={shareUrl} shareText={shareText} captureRef={captureRef} />
                 </div>
 
-                <HorarioTable data={filteredData} />
+                <div ref={captureRef}>
+                    <HorarioTable data={filteredData} />
+                </div>
             </div>
         </div>
     );
