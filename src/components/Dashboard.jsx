@@ -249,13 +249,20 @@ export default function Dashboard({ hideAdministrativeAreas }) {
                     />
                 </div>
 
-                <DayTabs activeDay={currentDay} onDayChange={setCurrentDay} />
+                {/* Day Tabs + Share Actions — same row */}
+                <div className="flex items-center justify-between gap-4 mb-4">
+                    <div className="overflow-x-auto scrollbar-hide">
+                        <DayTabs activeDay={currentDay} onDayChange={setCurrentDay} />
+                    </div>
+                    <div className="flex-shrink-0">
+                        <ShareButton shareUrl={shareUrl} shareText={shareText} captureRef={captureRef} captureTitle={captureTitle} />
+                    </div>
+                </div>
 
-                <div className="mb-4 flex items-center justify-between">
+                <div className="mb-4">
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                         Mostrando <span className="font-bold text-blue-600 dark:text-blue-400">{filteredData.length}</span> registros
                     </span>
-                    <ShareButton shareUrl={shareUrl} shareText={shareText} captureRef={captureRef} captureTitle={captureTitle} />
                 </div>
 
                 <div ref={captureRef}>
