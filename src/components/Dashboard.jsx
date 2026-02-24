@@ -77,11 +77,16 @@ export default function Dashboard({ hideAdministrativeAreas }) {
                     if (match) initialFilters.Area.add(match.Area);
                     hasDeepLinks = true;
                 }
+                if (params.has('dia')) {
+                    const diaParam = params.get('dia');
+                    // Find exact day match (case-insensitive) from the data
+                    const match = publicData.find(d => d.Día.toLowerCase() === diaParam.toLowerCase());
+                    if (match) setCurrentDay(match.Día);
+                    hasDeepLinks = true;
+                }
 
                 if (hasDeepLinks) {
                     setActiveFilters(initialFilters);
-                    // Si aplicamos deep link, el día tal vez deba resetearse o mantenerse?
-                    // Mantenemos Auto-Day salvo que no haya resultados, pero dejemoslo así.
                 }
 
             } catch (error) {
@@ -203,7 +208,7 @@ export default function Dashboard({ hideAdministrativeAreas }) {
         if (activeFilters.Area.size) parts.push([...activeFilters.Area].join(', '));
         if (activeFilters.Asesor.size) parts.push([...activeFilters.Asesor].join(', '));
         const context = parts.length ? ` — ${parts.join(' | ')}` : '';
-        const text = `📅 Horario de Asesorías${context}\nQuédate en Colmayor`;
+        const text = `Horario de Asesorías${context}\nQuédate en Colmayor`;
 
         return { shareUrl: url, shareText: text };
     }, [currentDay, activeFilters]);
