@@ -66,27 +66,22 @@ export default function ShareButton({ shareUrl, shareText, captureRef }) {
         if (!captureRef?.current) return;
         setCapturing(true);
         try {
-            const html2canvas = (await import("html2canvas")).default;
+            // html-to-image uses native browser CSS rendering — supports oklch, CSS vars, etc.
+            // html2canvas was replaced because it doesn't support modern CSS color functions.
+            const { toPng } = await import("html-to-image");
 
-            const canvas = await html2canvas(captureRef.current, {
-                useCORS: true,
+            const dataUrl = await toPng(captureRef.current, {
+                cacheBust: true,
+                pixelRatio: 2,
                 backgroundColor: "#ffffff",
-                scale: 2,
-                logging: false,
             });
 
-            const blob = await new Promise((resolve) =>
-                canvas.toBlob(resolve, "image/png")
-            );
-
-            const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
-            a.href = url;
+            a.href = dataUrl;
             a.download = "horario-asesorias.png";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            URL.revokeObjectURL(url);
 
             setDownloaded(true);
             setTimeout(() => setDownloaded(false), 3000);
