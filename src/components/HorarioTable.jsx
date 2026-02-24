@@ -248,11 +248,7 @@ export default function HorarioTable({ data }) {
                                         <div className="flex items-baseline gap-1">
                                             <span className="text-lg font-bold text-slate-900 dark:text-white">{item.Hora_Inicio}</span>
                                             <span className="text-xs text-slate-500">-</span>
-                                            <div className="flex items-baseline gap-1">
-                                                <span className="text-lg font-bold text-slate-900 dark:text-white">{item.Hora_Inicio}</span>
-                                                <span className="text-xs text-slate-500">-</span>
-                                                <span className="text-xs font-medium text-slate-500">{item.Hora_Fin}</span>
-                                            </div>
+                                            <span className="text-xs font-medium text-slate-500">{item.Hora_Fin}</span>
                                             {isActive && (
                                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 text-[10px] font-semibold">
                                                     <span className="relative flex h-1.5 w-1.5">
