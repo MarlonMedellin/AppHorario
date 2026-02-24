@@ -65,57 +65,36 @@ export default function ShareButton({ shareUrl, shareText, captureRef, captureTi
     const handleImageDownload = async () => {
         if (!captureRef?.current) return;
         setCapturing(true);
+
+        // Build filename before async work
+        const slug = (captureTitle || 'horario')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const filename = `horario-${slug}.png`;
+
+        // Temporarily insert branded header into the REAL DOM node so styles are intact
+        const header = document.createElement('div');
+        header.id = '__share-export-header__';
+        header.style.cssText = 'padding:20px 24px 16px;border-bottom:2px solid #e2e8f0;margin-bottom:16px;background:#ffffff;font-family:Inter,system-ui,sans-serif;';
+        header.innerHTML = `
+            <h1 style="margin:0 0 4px;font-size:20px;font-weight:700;color:#0f172a;line-height:1.2;">Quédate en Colmayor</h1>
+            <p style="margin:0 0 10px;font-size:12px;color:#64748b;">Ingreso, Permanencia y Graduación</p>
+            <h2 style="margin:0;font-size:14px;font-weight:600;color:#1d4ed8;">Horario de Asesorías — ${captureTitle || 'Todos los días'}</h2>
+        `;
+        captureRef.current.insertBefore(header, captureRef.current.firstChild);
+
         try {
             const { toPng } = await import("html-to-image");
 
-            // Build a normalized filename from captureTitle
-            // e.g. "Lunes · Matemáticas" → "horario-lunes-matematicas.png"
-            const slug = (captureTitle || 'horario')
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-            const filename = `horario-${slug}.png`;
-
-            // Create an off-screen wrapper with a branded header + the table clone
-            const wrapper = document.createElement('div');
-            wrapper.style.cssText = [
-                'position:absolute',
-                'left:-9999px',
-                'top:0',
-                'background:#ffffff',
-                'padding:28px 32px 24px',
-                'font-family:Inter,system-ui,sans-serif',
-                'width:' + captureRef.current.offsetWidth + 'px',
-                'box-sizing:border-box',
-            ].join(';');
-
-            // Header HTML
-            const header = document.createElement('div');
-            header.style.cssText = 'margin-bottom:20px;border-bottom:2px solid #e2e8f0;padding-bottom:16px;';
-            header.innerHTML = `
-                <h1 style="margin:0 0 4px;font-size:22px;font-weight:700;color:#0f172a;line-height:1.2">
-                    Quédate en Colmayor
-                </h1>
-                <p style="margin:0 0 12px;font-size:13px;color:#64748b;">
-                    Ingreso, Permanencia y Graduación
-                </p>
-                <h2 style="margin:0;font-size:15px;font-weight:600;color:#1d4ed8;">
-                    Horario de Asesorías — ${captureTitle || 'Todos los días'}
-                </h2>
-            `;
-
-            const tableClone = captureRef.current.cloneNode(true);
-
-            wrapper.appendChild(header);
-            wrapper.appendChild(tableClone);
-            document.body.appendChild(wrapper);
-
-            const dataUrl = await toPng(wrapper, {
+            const dataUrl = await toPng(captureRef.current, {
                 cacheBust: true,
                 pixelRatio: 2,
                 backgroundColor: '#ffffff',
             });
 
-            document.body.removeChild(wrapper);
+            // Remove header from real DOM immediately after capture
+            const inserted = captureRef.current.querySelector('#__share-export-header__');
+            if (inserted) captureRef.current.removeChild(inserted);
 
             const a = document.createElement('a');
             a.href = dataUrl;
@@ -127,6 +106,9 @@ export default function ShareButton({ shareUrl, shareText, captureRef, captureTi
             setDownloaded(true);
             setTimeout(() => setDownloaded(false), 3000);
         } catch (err) {
+            // Always clean up header even on failure
+            const inserted = captureRef.current?.querySelector('#__share-export-header__');
+            if (inserted) captureRef.current.removeChild(inserted);
             console.warn('Image download failed:', err);
         } finally {
             setCapturing(false);
