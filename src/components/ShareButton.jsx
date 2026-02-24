@@ -33,7 +33,7 @@ const Spinner = () => (
     </svg>
 );
 
-export default function ShareButton({ shareUrl, shareText, captureRef }) {
+export default function ShareButton({ shareUrl, shareText, captureRef, captureTitle }) {
     const [canShare, setCanShare] = useState(false);
     const [capturing, setCapturing] = useState(false);
     const [downloaded, setDownloaded] = useState(false);
@@ -66,19 +66,60 @@ export default function ShareButton({ shareUrl, shareText, captureRef }) {
         if (!captureRef?.current) return;
         setCapturing(true);
         try {
-            // html-to-image uses native browser CSS rendering — supports oklch, CSS vars, etc.
-            // html2canvas was replaced because it doesn't support modern CSS color functions.
             const { toPng } = await import("html-to-image");
 
-            const dataUrl = await toPng(captureRef.current, {
+            // Build a normalized filename from captureTitle
+            // e.g. "Lunes · Matemáticas" → "horario-lunes-matematicas.png"
+            const slug = (captureTitle || 'horario')
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            const filename = `horario-${slug}.png`;
+
+            // Create an off-screen wrapper with a branded header + the table clone
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = [
+                'position:absolute',
+                'left:-9999px',
+                'top:0',
+                'background:#ffffff',
+                'padding:28px 32px 24px',
+                'font-family:Inter,system-ui,sans-serif',
+                'width:' + captureRef.current.offsetWidth + 'px',
+                'box-sizing:border-box',
+            ].join(';');
+
+            // Header HTML
+            const header = document.createElement('div');
+            header.style.cssText = 'margin-bottom:20px;border-bottom:2px solid #e2e8f0;padding-bottom:16px;';
+            header.innerHTML = `
+                <h1 style="margin:0 0 4px;font-size:22px;font-weight:700;color:#0f172a;line-height:1.2">
+                    Quédate en Colmayor
+                </h1>
+                <p style="margin:0 0 12px;font-size:13px;color:#64748b;">
+                    Ingreso, Permanencia y Graduación
+                </p>
+                <h2 style="margin:0;font-size:15px;font-weight:600;color:#1d4ed8;">
+                    Horario de Asesorías — ${captureTitle || 'Todos los días'}
+                </h2>
+            `;
+
+            const tableClone = captureRef.current.cloneNode(true);
+
+            wrapper.appendChild(header);
+            wrapper.appendChild(tableClone);
+            document.body.appendChild(wrapper);
+
+            const dataUrl = await toPng(wrapper, {
                 cacheBust: true,
                 pixelRatio: 2,
-                backgroundColor: "#ffffff",
+                backgroundColor: '#ffffff',
             });
 
-            const a = document.createElement("a");
+            document.body.removeChild(wrapper);
+
+            const a = document.createElement('a');
             a.href = dataUrl;
-            a.download = "horario-asesorias.png";
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -86,7 +127,7 @@ export default function ShareButton({ shareUrl, shareText, captureRef }) {
             setDownloaded(true);
             setTimeout(() => setDownloaded(false), 3000);
         } catch (err) {
-            console.warn("Image download failed:", err);
+            console.warn('Image download failed:', err);
         } finally {
             setCapturing(false);
         }

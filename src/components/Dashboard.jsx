@@ -192,7 +192,7 @@ export default function Dashboard({ hideAdministrativeAreas }) {
     };
 
     // Build a shareable deep-link URL from the current filter state
-    const { shareUrl, shareText } = useMemo(() => {
+    const { shareUrl, shareText, captureTitle } = useMemo(() => {
         const base = typeof window !== 'undefined'
             ? window.location.origin + window.location.pathname
             : 'https://quedate.pages.dev/';
@@ -210,8 +210,9 @@ export default function Dashboard({ hideAdministrativeAreas }) {
         if (activeFilters.Asesor.size) parts.push([...activeFilters.Asesor].join(', '));
         const context = parts.length ? ` — ${parts.join(' | ')}` : '';
         const text = `Horario de Asesorías${context}\nQuédate en Colmayor`;
+        const captureTitle = parts.length ? parts.join(' · ') : 'Todos los días';
 
-        return { shareUrl: url, shareText: text };
+        return { shareUrl: url, shareText: text, captureTitle };
     }, [currentDay, activeFilters]);
 
     if (loading) {
@@ -254,7 +255,7 @@ export default function Dashboard({ hideAdministrativeAreas }) {
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                         Mostrando <span className="font-bold text-blue-600 dark:text-blue-400">{filteredData.length}</span> registros
                     </span>
-                    <ShareButton shareUrl={shareUrl} shareText={shareText} captureRef={captureRef} />
+                    <ShareButton shareUrl={shareUrl} shareText={shareText} captureRef={captureRef} captureTitle={captureTitle} />
                 </div>
 
                 <div ref={captureRef}>
