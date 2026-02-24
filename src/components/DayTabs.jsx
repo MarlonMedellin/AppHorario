@@ -1,5 +1,14 @@
 import React from 'react';
 
+const dayAbbr = {
+    "Lunes": "L",
+    "Martes": "M",
+    "Miércoles": "X",
+    "Jueves": "J",
+    "Viernes": "V",
+    "Sábado": "S",
+};
+
 export default function DayTabs({ activeDay, onDayChange }) {
     const days = [
         "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"
@@ -30,7 +39,9 @@ export default function DayTabs({ activeDay, onDayChange }) {
                             : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"}
                         `}
                 >
-                    {day}
+                    {/* Abreviación en mobile, nombre completo en desktop */}
+                    <span className="md:hidden">{dayAbbr[day]}</span>
+                    <span className="hidden md:inline">{day}</span>
                 </button>
             ))}
         </div>
