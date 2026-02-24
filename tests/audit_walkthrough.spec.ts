@@ -33,9 +33,11 @@ test.describe('Auditoría MVP vs Documentación', () => {
         // Simular autenticación para evitar redirect
         await page.evaluate(() => {
             localStorage.setItem('horarios_session', JSON.stringify({
-                nombre: 'Test User',
-                correo: 'test@example.com',
-                rol: 'Estudiante'
+                user: {
+                    nombre: 'Test User',
+                    correo: 'test@example.com',
+                    rol: 'Estudiante'
+                }
             }));
         });
 

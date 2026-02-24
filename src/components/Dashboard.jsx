@@ -206,7 +206,7 @@ export default function Dashboard() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-6">
+            <div className="flex-1 p-6">
                 <div className="mb-6">
                     <input
                         type="text"
@@ -224,7 +224,7 @@ export default function Dashboard() {
                 </div>
 
                 <HorarioTable data={filteredData} />
-            </main>
+            </div>
         </div>
     );
 }

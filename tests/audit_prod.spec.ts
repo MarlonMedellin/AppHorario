@@ -5,14 +5,14 @@ test('Audit Production Deployment', async ({ page }) => {
     await page.goto('https://quedate.pages.dev/');
 
     // 2. Verify page title
-    await expect(page).toHaveTitle(/HorariosQuedate/);
+    await expect(page).toHaveTitle(/Quédate en Colmayor \| Ingreso, Permanencia y Graduación/);
 
     // 3. Verify the loading state appears (optional, might be too fast)
     // await expect(page.getByText('Cargando agenda...')).toBeVisible();
 
-    // 4. Verify data is loaded (The "Resultados" text should show a number > 0)
-    const countDisplay = page.locator('#count-display');
-    await expect(countDisplay).toContainText(/Resultados/);
+    // 4. Verify data is loaded
+    const countDisplay = page.getByText(/Mostrando.*registros/);
+    await expect(countDisplay).toBeVisible();
 
     // Wait for the text to settle (it might start at 0 or empty)
     // We expect it to NOT be "0 Resultados" eventually, assuming there is data.

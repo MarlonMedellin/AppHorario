@@ -1,0 +1,15 @@
+﻿3dec70d fix(schedule): update WhatsApp modality link to production catalog URL
+2d4e652 chore(release): bump version to v3.4.0
+af2c200 feat(schedule): add dynamic active time slot highlighting with pulsating badge
+65987d9 fix(layout): update footer version display to v3.3.0
+25d051d feat(schedule): add virtual modality links and update area filters
+a9f03b2 refactor(dashboard): unify insight card structure and update filter content
+357e755 feat(filters): update area and advisor filter lists with complete data
+5666ac8 feat(dashboard): improve summary card content clarity and metrics
+6cea930 fix(footer): sync version display with package.json (v3.2.0)
+0130416 feat(dashboard): update summary cards with advisory service statistics
+52cc147 fix(ui): add bottom padding to prevent content overlap with mobile nav
+be55d33 feat(ui): implement mobile responsive layout with bottom navigation
+0b5f465 fix(security): add rel noopener noreferrer to external links
+9e8e350 fix(footer): add youtube and linkedin social links
+9048e39 feat(dashboard): apply pro-academic design v4 and migrate all pages

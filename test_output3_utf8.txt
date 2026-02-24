@@ -1,0 +1,66 @@
+﻿
+Running 5 tests using 1 worker
+
+[1A[2K[1/5] [chromium] ÔÇ║ tests\audit_prod.spec.ts:3:1 ÔÇ║ Audit Production Deployment
+[1A[2K  1) [chromium] ÔÇ║ tests\audit_prod.spec.ts:3:1 ÔÇ║ Audit Production Deployment ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: locator('#count-display')
+    Expected pattern: [32m/Resultados/[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for locator('#count-display')[22m
+
+
+      13 |     // 4. Verify data is loaded (The "Resultados" text should show a number > 0)
+      14 |     const countDisplay = page.locator('#count-display');
+    > 15 |     await expect(countDisplay).toContainText(/Resultados/);
+         |                                ^
+      16 |
+      17 |     // Wait for the text to settle (it might start at 0 or empty)
+      18 |     // We expect it to NOT be "0 Resultados" eventually, assuming there is data.
+        at C:\GIT\AppHorario\tests\audit_prod.spec.ts:15:32
+
+    Error Context: test-results\audit_prod-Audit-Production-Deployment-chromium\error-context.md
+
+
+[1A[2K[2/5] [chromium] ÔÇ║ tests\audit_walkthrough.spec.ts:5:5 ÔÇ║ Auditor├¡a MVP vs Documentaci├│n ÔÇ║ Navegaci├│n Completa y Verificaci├│n UI
+[1A[2K  2) [chromium] ÔÇ║ tests\audit_walkthrough.spec.ts:5:5 ÔÇ║ Auditor├¡a MVP vs Documentaci├│n ÔÇ║ Navegaci├│n Completa y Verificaci├│n UI 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/.*personalizados/[39m
+    Received string:  [31m"http://localhost:4321/"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 ├ù unexpected value "http://localhost:4321/"[22m
+
+
+      44 |         if (await personalLink.count() > 0) {
+      45 |             await personalLink.first().click();
+    > 46 |             await expect(page).toHaveURL(/.*personalizados/);
+         |                                ^
+      47 |             await page.waitForTimeout(1500);
+      48 |         }
+      49 |
+        at C:\GIT\AppHorario\tests\audit_walkthrough.spec.ts:46:32
+
+    Error Context: test-results\audit_walkthrough-Auditor├¡-2726d--Completa-y-Verificaci├│n-UI-chromium\error-context.md
+
+
+[1A[2K[3/5] [chromium] ÔÇ║ tests\e2e.spec.ts:3:1 ÔÇ║ App de Horarios carga correctamente
+[1A[2K[4/5] [chromium] ÔÇ║ tests\env_verification.spec.ts:3:1 ÔÇ║ Verificar carga de datos usando variables de entorno
+[1A[2K[chromium] ÔÇ║ tests\env_verification.spec.ts:3:1 ÔÇ║ Verificar carga de datos usando variables de entorno
+Elementos de horario detectados: 31
+
+[1A[2K[5/5] [chromium] ÔÇ║ tests\login_verification.spec.ts:3:1 ÔÇ║ Usuario puede abrir el modal de login
+[1A[2K  2 failed
+    [chromium] ÔÇ║ tests\audit_prod.spec.ts:3:1 ÔÇ║ Audit Production Deployment ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    [chromium] ÔÇ║ tests\audit_walkthrough.spec.ts:5:5 ÔÇ║ Auditor├¡a MVP vs Documentaci├│n ÔÇ║ Navegaci├│n Completa y Verificaci├│n UI 
+  3 passed (42.6s)

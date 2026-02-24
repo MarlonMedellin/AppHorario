@@ -1,0 +1,67 @@
+﻿
+Running 5 tests using 1 worker
+
+[1A[2K[1/5] [chromium] ÔÇ║ tests\audit_prod.spec.ts:3:1 ÔÇ║ Audit Production Deployment
+[1A[2K  1) [chromium] ÔÇ║ tests\audit_prod.spec.ts:3:1 ÔÇ║ Audit Production Deployment ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveTitle[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/HorariosQuedate/[39m
+    Received string:  [31m"Qu├®date en Colmayor | Ingreso, Permanencia y Graduaci├│n"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveTitle" with timeout 5000ms[22m
+    [2m    9 ├ù unexpected value "Qu├®date en Colmayor | Ingreso, Permanencia y Graduaci├│n"[22m
+
+
+       6 |
+       7 |     // 2. Verify page title
+    >  8 |     await expect(page).toHaveTitle(/HorariosQuedate/);
+         |                        ^
+       9 |
+      10 |     // 3. Verify the loading state appears (optional, might be too fast)
+      11 |     // await expect(page.getByText('Cargando agenda...')).toBeVisible();
+        at C:\GIT\AppHorario\tests\audit_prod.spec.ts:8:24
+
+    Error Context: test-results\audit_prod-Audit-Production-Deployment-chromium\error-context.md
+
+
+[1A[2K[2/5] [chromium] ÔÇ║ tests\audit_walkthrough.spec.ts:5:5 ÔÇ║ Auditor├¡a MVP vs Documentaci├│n ÔÇ║ Navegaci├│n Completa y Verificaci├│n UI
+[1A[2K  2) [chromium] ÔÇ║ tests\audit_walkthrough.spec.ts:5:5 ÔÇ║ Auditor├¡a MVP vs Documentaci├│n ÔÇ║ Navegaci├│n Completa y Verificaci├│n UI 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('main')
+    Expected: visible
+    Error: strict mode violation: locator('main') resolved to 2 elements:
+        1) <main class="flex-1 overflow-y-auto p-6 md:p-8 pb-20 md:pb-8 scroll-smooth">ÔÇª</main> aka getByRole('main').filter({ hasText: 'Qu├®date en Colmayor Ingreso,' })
+        2) <main class="flex-1 p-6">ÔÇª</main> aka getByText('TodoLunesMartesMi├®rcolesJuevesViernesS├íbadoMostrando 31')
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('main')[22m
+
+
+      19 |         // 3. Visualizaci├│n de Datos (Index)
+      20 |         // Verificar presencia de contenido principal
+    > 21 |         await expect(page.locator('main')).toBeVisible();
+         |                                            ^
+      22 |
+      23 |         // Verificar b├║squeda si existe
+      24 |         const searchInput = page.locator('input[type="search"], input[placeholder*="Buscar"]');
+        at C:\GIT\AppHorario\tests\audit_walkthrough.spec.ts:21:44
+
+    Error Context: test-results\audit_walkthrough-Auditor├¡-2726d--Completa-y-Verificaci├│n-UI-chromium\error-context.md
+
+
+[1A[2K[3/5] [chromium] ÔÇ║ tests\e2e.spec.ts:3:1 ÔÇ║ App de Horarios carga correctamente
+[1A[2K[4/5] [chromium] ÔÇ║ tests\env_verification.spec.ts:3:1 ÔÇ║ Verificar carga de datos usando variables de entorno
+[1A[2K[chromium] ÔÇ║ tests\env_verification.spec.ts:3:1 ÔÇ║ Verificar carga de datos usando variables de entorno
+Elementos de horario detectados: 31
+
+[1A[2K[5/5] [chromium] ÔÇ║ tests\login_verification.spec.ts:3:1 ÔÇ║ Usuario puede abrir el modal de login
+[1A[2K  2 failed
+    [chromium] ÔÇ║ tests\audit_prod.spec.ts:3:1 ÔÇ║ Audit Production Deployment ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    [chromium] ÔÇ║ tests\audit_walkthrough.spec.ts:5:5 ÔÇ║ Auditor├¡a MVP vs Documentaci├│n ÔÇ║ Navegaci├│n Completa y Verificaci├│n UI 
+  3 passed (33.7s)

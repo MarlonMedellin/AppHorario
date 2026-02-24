@@ -1,0 +1,52 @@
+﻿diff --git a/package.json b/package.json
+index af3e725..d26efa8 100644
+--- a/package.json
++++ b/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "red-raspberry",
+   "type": "module",
+-  "version": "3.4.0",
++  "version": "3.4.1",
+   "scripts": {
+     "dev": "astro dev",
+     "build": "astro build",
+diff --git a/src/components/HorarioTable.astro b/src/components/HorarioTable.astro
+index 6bad849..b13c868 100644
+--- a/src/components/HorarioTable.astro
++++ b/src/components/HorarioTable.astro
+@@ -28,7 +28,7 @@ const areaColorMap: Record<string, string> = {
+ const modalidadLinks: Record<string, string> = {
+     "Virtual (Meet)": "https://meet.google.com/test-meet-link",
+     "Virtual (Teams)": "https://teams.microsoft.com/test-teams-link",
+-    "Virtual (Whatsapp)": "https://wa.me/573001234567",
++    "Virtual (Whatsapp)": "https://wa.me/p/9161411507267624/573013333758",
+     H├¡brido: "https://meet.google.com/test-hibrido-link",
+ };
+ 
+diff --git a/src/components/HorarioTable.jsx b/src/components/HorarioTable.jsx
+index 294a3b0..f35b9ed 100644
+--- a/src/components/HorarioTable.jsx
++++ b/src/components/HorarioTable.jsx
+@@ -18,7 +18,7 @@ const areaColorMap = {
+ const modalidadLinks = {
+     "Virtual (Meet)": "https://meet.google.com/test-meet-link",
+     "Virtual (Teams)": "https://teams.microsoft.com/test-teams-link",
+-    "Virtual (Whatsapp)": "https://wa.me/573001234567",
++    "Virtual (Whatsapp)": "https://wa.me/p/9161411507267624/573013333758",
+     "H├¡brido": "https://meet.google.com/test-hibrido-link",
+ };
+ 
+diff --git a/src/layouts/DashboardLayout.astro b/src/layouts/DashboardLayout.astro
+index 62cdf7e..0d54495 100644
+--- a/src/layouts/DashboardLayout.astro
++++ b/src/layouts/DashboardLayout.astro
+@@ -80,7 +80,7 @@ const { title = "Dashboard | Colmayor" } = Astro.props;
+                                     d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                                 ></path></svg
+                             >
+-                            <span>v3.4.0</span>
++                            <span>v3.4.1</span>
+                         </div>
+ 
+                         <!-- Right: Social Links -->
