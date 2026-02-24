@@ -134,11 +134,12 @@ const getAreaIcon = (area: string) => {
 
                         return (
                             <tr
-                                class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                                class={`group transition-colors ${isCancelado ? "bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20" : "hover:bg-slate-50 dark:hover:bg-slate-800/50"}`}
                                 data-dia={item.Día}
                                 data-asesor={item.Asesor}
                                 data-hora-inicio={item.Hora_Inicio}
                                 data-hora-fin={item.Hora_Fin}
+                                data-cancelado={isCancelado ? "true" : "false"}
                                 data-search-text={`${item.Día} ${item.Asignatura} ${item.Asesor} ${item.Sede} ${item.Ubicación_Detalle}`.toLowerCase()}
                             >
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -293,11 +294,12 @@ const getAreaIcon = (area: string) => {
 
             return (
                 <div
-                    class="relative bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-lg border border-slate-100 dark:border-slate-700"
+                    class={`relative rounded-2xl p-4 shadow-lg border ${isCancelado ? "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30" : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700"}`}
                     data-dia={item.Día}
                     data-asesor={item.Asesor}
                     data-hora-inicio={item.Hora_Inicio}
                     data-hora-fin={item.Hora_Fin}
+                    data-cancelado={isCancelado ? "true" : "false"}
                     data-search-text={`${item.Día} ${item.Asignatura} ${item.Asesor} ${item.Sede} ${item.Ubicación_Detalle}`.toLowerCase()}
                 >
                     <div class="flex justify-between items-start mb-2">
@@ -538,8 +540,11 @@ const getAreaIcon = (area: string) => {
             const dia = el.dataset.dia;
             const horaInicio = el.dataset.horaInicio || "";
             const horaFin = el.dataset.horaFin || "";
+            const isCancelado = el.dataset.cancelado === "true";
             const isActive =
-                dia === todayName && isTimeSlotActive(horaInicio, horaFin);
+                dia === todayName &&
+                isTimeSlotActive(horaInicio, horaFin) &&
+                !isCancelado;
             const isCard = el.tagName !== "TR";
 
             // Handle left bar indicator (desktop rows)
@@ -573,13 +578,19 @@ const getAreaIcon = (area: string) => {
             } else {
                 if (isCard) {
                     ACTIVE_CLASSES_CARD.forEach((c) => el.classList.remove(c));
-                    INACTIVE_CARD_CLASSES.forEach((c) => el.classList.add(c));
+                    if (!isCancelado) {
+                        INACTIVE_CARD_CLASSES.forEach((c) =>
+                            el.classList.add(c),
+                        );
+                    }
                 } else {
                     ACTIVE_CLASSES_ROW.forEach((c) => el.classList.remove(c));
-                    el.classList.add(
-                        "hover:bg-slate-50",
-                        "dark:hover:bg-slate-800/50",
-                    );
+                    if (!isCancelado) {
+                        el.classList.add(
+                            "hover:bg-slate-50",
+                            "dark:hover:bg-slate-800/50",
+                        );
+                    }
                 }
                 if (bar && !bar.classList.contains("bg-red-400")) {
                     bar.classList.remove("bg-green-500");

@@ -105,10 +105,10 @@ export default function HorarioTable({ data }) {
                                 const modalidadLink = modalidadLinks[item.Modalidad] || null;
                                 const hasLink = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) || modalidadLink;
                                 const virtualHref = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) ? item.Ubicación_Detalle : modalidadLink;
-                                const isActive = isTodayName(item.Día) && isTimeSlotActive(item.Hora_Inicio, item.Hora_Fin);
+                                const isActive = isTodayName(item.Día) && isTimeSlotActive(item.Hora_Inicio, item.Hora_Fin) && !isCancelado;
 
                                 return (
-                                    <tr key={index} className={`group transition-colors ${isActive ? "bg-green-50 dark:bg-green-900/20" : "hover:bg-slate-50 dark:hover:bg-slate-800/50"}`}>
+                                    <tr key={index} className={`group transition-colors ${isCancelado ? "bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20" : isActive ? "bg-green-50 dark:bg-green-900/20" : "hover:bg-slate-50 dark:hover:bg-slate-800/50"}`}>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 <div className={`h-10 w-1 rounded-full ${isCancelado ? "bg-red-400" : isActive ? "bg-green-500" : "bg-slate-200 dark:bg-slate-600"}`} />
@@ -193,10 +193,10 @@ export default function HorarioTable({ data }) {
                     const modalidadLink = modalidadLinks[item.Modalidad] || null;
                     const hasLink = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) || modalidadLink;
                     const virtualHref = (item.Ubicación_Detalle && item.Ubicación_Detalle.startsWith("http")) ? item.Ubicación_Detalle : modalidadLink;
-                    const isActive = isTodayName(item.Día) && isTimeSlotActive(item.Hora_Inicio, item.Hora_Fin);
+                    const isActive = isTodayName(item.Día) && isTimeSlotActive(item.Hora_Inicio, item.Hora_Fin) && !isCancelado;
 
                     return (
-                        <div key={index} className={`relative rounded-2xl p-4 shadow-lg border ${isActive ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700"}`}>
+                        <div key={index} className={`relative rounded-2xl p-4 shadow-lg border ${isCancelado ? "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30" : isActive ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700"}`}>
                             <div className="flex justify-between items-start mb-2">
                                 <div className="flex items-center gap-2">
                                     <span className="px-2 py-1 rounded-md bg-blue-600/10 dark:bg-blue-600/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase">

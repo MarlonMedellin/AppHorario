@@ -32,8 +32,10 @@ export default function Dashboard() {
             try {
                 // Fetch Data
                 const fetchedData = await fetchMatrizFlexible();
-                setData(fetchedData);
-                setFilteredData(fetchedData);
+                // Filtrar para excluir el estado "Interno" de la vista pública
+                const publicData = fetchedData.filter(item => item.Estado !== "Interno");
+                setData(publicData);
+                setFilteredData(publicData);
 
                 // Auto-Day
                 const todayIndex = new Date().getDay();
@@ -56,21 +58,21 @@ export default function Dashboard() {
                     // Buscar coincidencia inexacta o exacta?
                     // Por exactitud, asumimos que viene limpio o intentamos calzar.
                     // Iteramos datos para buscar match
-                    const match = fetchedData.find(d => d.Asesor.toLowerCase().includes(asesorParam.toLowerCase()));
+                    const match = publicData.find(d => d.Asesor.toLowerCase().includes(asesorParam.toLowerCase()));
                     if (match) initialFilters.Asesor.add(match.Asesor);
                     hasDeepLinks = true;
                 }
                 if (params.has('sede')) {
                     const sedeParam = params.get('sede');
                     // Similar logic or direct add
-                    const match = fetchedData.find(d => d.Sede.toLowerCase() === sedeParam.toLowerCase());
+                    const match = publicData.find(d => d.Sede.toLowerCase() === sedeParam.toLowerCase());
                     if (match) initialFilters.Sede.add(match.Sede);
                     hasDeepLinks = true;
                 }
                 if (params.has('area')) {
                     const areaParam = params.get('area');
                     // Note: Area param might need normalization match
-                    const match = fetchedData.find(d => d.Area.toLowerCase() === areaParam.toLowerCase());
+                    const match = publicData.find(d => d.Area.toLowerCase() === areaParam.toLowerCase());
                     if (match) initialFilters.Area.add(match.Area);
                     hasDeepLinks = true;
                 }
