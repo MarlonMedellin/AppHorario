@@ -250,14 +250,14 @@ export default function Dashboard({ hideAdministrativeAreas }) {
                     />
                 </div>
 
-                {/* Day Tabs + Share Actions — same row */}
-                <div className="flex items-center justify-between gap-4 mb-4">
-                    <div className="overflow-x-auto scrollbar-hide">
-                        <DayTabs activeDay={currentDay} onDayChange={setCurrentDay} />
-                    </div>
-                    <div className="flex-shrink-0">
-                        <ShareButton shareUrl={shareUrl} shareText={shareText} captureRef={captureRef} captureTitle={captureTitle} />
-                    </div>
+                {/* Share Actions — fila dedicada (V1 Stitch) */}
+                <div className="flex items-center justify-end mb-2">
+                    <ShareButton shareUrl={shareUrl} shareText={shareText} captureRef={captureRef} captureTitle={captureTitle} />
+                </div>
+
+                {/* Day Tabs — fila completa sin competencia */}
+                <div className="overflow-x-auto scrollbar-hide mb-4">
+                    <DayTabs activeDay={currentDay} onDayChange={setCurrentDay} />
                 </div>
 
                 <div ref={captureRef}>
