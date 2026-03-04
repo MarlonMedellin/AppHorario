@@ -1,139 +1,43 @@
-import Papa from 'papaparse';
-import { HorarioRowSchema } from '../schemas/HorarioSchema';
+import { createClient } from '@supabase/supabase-js';
 
-const GOOGLE_SHEET_URL = import.meta.env.PUBLIC_CSV_URL_MATRIZ;
-const CONFIG_SHEET_URL = import.meta.env.PUBLIC_CSV_URL_CONFIG;
+const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || import.meta.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY;
 
-// Memoria Caché para evitar "Rate limit" de Google
-let cachedMatrizData: any[] | null = null;
-let lastMatrizFetchTime = 0;
-
-let cachedConfigData: any[] | null = null;
-let lastConfigFetchTime = 0;
-
-// Configurado a 3 minutos
-const CACHE_DURATION_MS = 3 * 60 * 1000;
+// Inicialización condicional (Astro Edge)
+const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY)
+    ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
 
 export async function fetchMatrizFlexible(forceRefresh = false) {
-    if (!GOOGLE_SHEET_URL) {
-        console.warn('⚠️ IMPORTANTE: PUBLIC_CSV_URL_MATRIZ no está definida. Cargando datos Mock para propósitos de Testing visual.');
+    if (!supabase) {
+        console.warn('⚠️ IMPORTANTE: Credenciales de Supabase no configuradas (.env). Cargando datos Mock para propósitos de Testing visual.');
         return getMockData();
     }
 
-    const now = Date.now();
-    // Cache Check
-    if (!forceRefresh && cachedMatrizData && (now - lastMatrizFetchTime < CACHE_DURATION_MS)) {
-        console.log(`⚡ Retornando Matriz Flexible desde Caché (Válido por ${Math.round((CACHE_DURATION_MS - (now - lastMatrizFetchTime)) / 1000)}s más)`);
-        return cachedMatrizData;
-    }
-
     try {
-        const timestamp = new Date().getTime();
-        const fetchUrl = `${GOOGLE_SHEET_URL}${GOOGLE_SHEET_URL.includes('?') ? '&' : '?'}t=${timestamp}`;
+        const { data, error } = await supabase
+            .from('horarios')
+            .select('*')
+            // Opcional: ordenar si es necesario
+            // .order('Día', { ascending: true })
+            ;
 
-        const response = await fetch(fetchUrl);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (error) {
+            throw error;
         }
 
-        const csvContent = await response.text();
-
-        const { data: rawData } = Papa.parse(csvContent, {
-            header: true,
-            skipEmptyLines: true,
-            dynamicTyping: false
-        });
-
-        const cleanData = (rawData as any[])
-            .filter(row => row.Asesor && row.Asesor.trim() !== '' && row.Día && row.Día.trim() !== '')
-            .map(row => {
-                const keys = Object.keys(row);
-                const areaKey = keys.find(k => k.toLowerCase().includes('rea')) || 'Area';
-                const startKey = keys.find(k => k.toLowerCase().includes('inicio')) || 'Hora_Inicio';
-                const endKey = keys.find(k => k.toLowerCase().includes('fin')) || 'Hora_Fin';
-                const ctaKey = keys.find(k => k.toLowerCase() === 'cta') || 'CTA';
-                const fotoKey = keys.find(k => k.toLowerCase().includes('foto')) || 'Link_Foto';
-
-                const mappedRow = {
-                    ...row,
-                    Area: row[areaKey],
-                    Hora_Inicio: row[startKey],
-                    Hora_Fin: row[endKey],
-                    CTA: row[ctaKey],
-                    Link_Foto: row[fotoKey],
-                };
-
-                // Zod Validation (Notice Error)
-                const validation = HorarioRowSchema.safeParse(mappedRow);
-
-                if (!validation.success) {
-                    return {
-                        ...mappedRow,
-                        hasTypoError: true,
-                        // Convertir errores a string legible
-                        typoDetails: validation.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(" | ")
-                    };
-                }
-
-                return {
-                    ...mappedRow,
-                    hasTypoError: false
-                };
-            });
-
-        console.log(`✅ Datos cargados y validados: ${cleanData.length} registros (Zod applied). Caché actualizado.`);
-
-        // Guardar en caché el éxito
-        cachedMatrizData = cleanData;
-        lastMatrizFetchTime = now;
-
-        return cleanData;
+        console.log(`✅ Datos cargados desde Supabase: ${data.length} registros (Ultra-rápidos).`);
+        return data || [];
     } catch (error) {
-        console.error('❌ Error al cargar datos desde Google Sheets:', error);
-        return cachedMatrizData || []; // Salvavidas: devolver data vieja si Google falló.
+        console.error('❌ Error crítico al consultar Supabase:', error);
+        return []; // Fallback silencioso por seguridad
     }
 }
 
+// Mantenemos esto si hay otra tabla, pero en un caso ideal, esta config de usuarios
+// también migraría a Supabase. De momento lo simularemos o ignoraremos, ya que el Auth puede suplirlo.
 export async function fetchConfigUsers(forceRefresh = false) {
-    if (!CONFIG_SHEET_URL) {
-        console.error('❌ ERROR CRÍTICO: PUBLIC_CSV_URL_CONFIG no está definida en las variables de entorno.');
-        return [];
-    }
-
-    const now = Date.now();
-    if (!forceRefresh && cachedConfigData && (now - lastConfigFetchTime < CACHE_DURATION_MS)) {
-        return cachedConfigData;
-    }
-
-    try {
-        const timestamp = new Date().getTime();
-        const fetchUrl = `${CONFIG_SHEET_URL}${CONFIG_SHEET_URL.includes('?') ? '&' : '?'}t=${timestamp}`;
-
-        const response = await fetch(fetchUrl);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const csvContent = await response.text();
-
-        const { data: rawData } = Papa.parse(csvContent, {
-            header: true,
-            skipEmptyLines: true,
-            dynamicTyping: false
-        });
-
-        const cleanData = (rawData as any[]).filter(row => row.Correo && row.Correo.trim() !== '');
-
-        cachedConfigData = cleanData;
-        lastConfigFetchTime = now;
-
-        return cleanData;
-    } catch (error) {
-        console.error('❌ Error al cargar CONFIG:', error);
-        return cachedConfigData || [];
-    }
+    return []; // Temporalmente desactivado hasta migrar Auth.
 }
 
 function getMockData() {

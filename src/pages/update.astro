@@ -1,0 +1,303 @@
+---
+// src/pages/update.astro
+import Papa from "papaparse";
+import { createClient } from "@supabase/supabase-js";
+import { HorarioRowSchema } from "../schemas/HorarioSchema";
+
+// Configuración y Variables de Entorno (Tomadas del ecosistema de Cloudflare/Astro)
+const TOKEN_SECRETO = "1235711primo";
+const URL_SOLICITADA = new URL(Astro.request.url);
+const TOKEN_PROPORCIONADO = URL_SOLICITADA.searchParams.get("token");
+
+const SUPABASE_URL =
+    import.meta.env.PUBLIC_SUPABASE_URL || import.meta.env.SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+const GOOGLE_SHEET_URL = import.meta.env.PUBLIC_CSV_URL_MATRIZ;
+
+// Variables de Estado de la Sincronización
+let syncHabilitada = false;
+let exito = false;
+let filasInsertadas = 0;
+let mensajeError = "";
+
+// 1. Verificación de Seguridad por Token
+if (TOKEN_PROPORCIONADO !== TOKEN_SECRETO) {
+    // Si la contraseña es incorrecta, Astro devolverá un 401 Unauthorized sin procesar la DB
+    return new Response(null, {
+        status: 401,
+        statusText: "Unauthorized - Token de Sincronizacion Invalido",
+    });
+} else {
+    syncHabilitada = true;
+}
+
+// 2. Ejecutar la Sincronización si está autenticado
+if (syncHabilitada) {
+    try {
+        if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !GOOGLE_SHEET_URL) {
+            throw new Error(
+                "Faltan variables de entorno esenciales (URL, SERVICE_KEY o CSV_URL).",
+            );
+        }
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+        // a. Descargar de Google Sheets
+        const timestamp = new Date().getTime();
+        const fetchUrl = `${GOOGLE_SHEET_URL}${GOOGLE_SHEET_URL.includes("?") ? "&" : "?"}t=${timestamp}`;
+
+        const response = await fetch(fetchUrl);
+        if (!response.ok) {
+            throw new Error(
+                `Google Sheets respondió con estado: ${response.status}`,
+            );
+        }
+
+        const csvContent = await response.text();
+
+        // b. Parsear el CSV
+        const { data: rawData } = Papa.parse(csvContent, {
+            header: true,
+            skipEmptyLines: true,
+            dynamicTyping: false,
+        });
+
+        // c. Limpiar y Validar con Zod
+        const dataToInsert = (rawData as any[])
+            .filter(
+                (row) =>
+                    row.Asesor &&
+                    row.Asesor.trim() !== "" &&
+                    row.Día &&
+                    row.Día.trim() !== "",
+            )
+            .map((row) => {
+                const keys = Object.keys(row);
+                const areaKey =
+                    keys.find((k) => k.toLowerCase().includes("rea")) || "Area";
+                const startKey =
+                    keys.find((k) => k.toLowerCase().includes("inicio")) ||
+                    "Hora_Inicio";
+                const endKey =
+                    keys.find((k) => k.toLowerCase().includes("fin")) ||
+                    "Hora_Fin";
+                const ctaKey =
+                    keys.find((k) => k.toLowerCase() === "cta") || "CTA";
+                const fotoKey =
+                    keys.find((k) => k.toLowerCase().includes("foto")) ||
+                    "Link_Foto";
+
+                const mappedRow = {
+                    ...row,
+                    Area: row[areaKey],
+                    Hora_Inicio: row[startKey],
+                    Hora_Fin: row[endKey],
+                    CTA: row[ctaKey],
+                    Link_Foto: row[fotoKey],
+                };
+
+                const validation = HorarioRowSchema.safeParse(mappedRow);
+
+                if (!validation.success) {
+                    return {
+                        Asesor: mappedRow.Asesor,
+                        Día: mappedRow.Día,
+                        Area: mappedRow.Area,
+                        Hora_Inicio: mappedRow.Hora_Inicio,
+                        Hora_Fin: mappedRow.Hora_Fin,
+                        Sede: mappedRow.Sede,
+                        Tipo: mappedRow["Tipo"],
+                        Asignatura: mappedRow["Asignatura"],
+                        Modalidad: mappedRow["Modalidad"],
+                        Ubicación_Detalle: mappedRow["Ubicación_Detalle"],
+                        CTA: mappedRow.CTA,
+                        Link_Foto: mappedRow.Link_Foto,
+                        Estado: mappedRow.Estado,
+                        hasTypoError: true,
+                        typoDetails: validation.error.errors
+                            .map((e) => `${e.path.join(".")}: ${e.message}`)
+                            .join(" | "),
+                    };
+                }
+
+                return {
+                    Asesor: mappedRow.Asesor,
+                    Día: mappedRow.Día,
+                    Area: mappedRow.Area,
+                    Hora_Inicio: mappedRow.Hora_Inicio,
+                    Hora_Fin: mappedRow.Hora_Fin,
+                    Sede: mappedRow.Sede,
+                    Tipo: mappedRow["Tipo"],
+                    Asignatura: mappedRow["Asignatura"],
+                    Modalidad: mappedRow["Modalidad"],
+                    Ubicación_Detalle: mappedRow["Ubicación_Detalle"],
+                    CTA: mappedRow.CTA,
+                    Link_Foto: mappedRow.Link_Foto,
+                    Estado: mappedRow.Estado,
+                    hasTypoError: false,
+                    typoDetails: null,
+                };
+            });
+
+        // d. Purgado (TRUNCATE Delete)
+        const { error: deleteError } = await supabase
+            .from("horarios")
+            .delete()
+            .neq("id", 0);
+
+        if (deleteError) {
+            throw new Error(`Fallo limpiando DB: ${deleteError.message}`);
+        }
+
+        // e. Inyección
+        const { error: insertError } = await supabase
+            .from("horarios")
+            .insert(dataToInsert);
+
+        if (insertError) {
+            throw new Error(
+                `Fallo inyectando filas en Supabase: ${insertError.message}`,
+            );
+        }
+
+        // f. Marcar Éxito
+        exito = true;
+        filasInsertadas = dataToInsert.length;
+    } catch (error: any) {
+        exito = false;
+        mensajeError =
+            error.message || "Error desconocido durante la sincronización.";
+    }
+}
+---
+
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sincronización de Base de Datos</title>
+        <!-- Tailwind via CDN for standalone stylish page -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                font-family: "Inter", sans-serif;
+            }
+        </style>
+    </head>
+    <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+        <div
+            class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all"
+        >
+            {
+                exito ? (
+                    <div class="p-8 text-center">
+                        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6 relative">
+                            <div class="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-20" />
+                            <svg
+                                class="h-10 w-10 text-green-600"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                />
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-gray-900 mb-2">
+                            ¡Sincronización Exitosa!
+                        </h2>
+                        <p class="text-sm text-gray-500 mb-6">
+                            Se han extraído, validado e inyectado{" "}
+                            <span class="font-bold text-gray-900">
+                                {filasInsertadas}
+                            </span>{" "}
+                            registros del Excel hacia la Base de Datos Supabase.
+                        </p>
+                        <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                            <p class="text-xs text-gray-600 font-mono">
+                                <span class="text-green-500 font-bold">✓</span>{" "}
+                                Descarga de Documento <br />
+                                <span class="text-green-500 font-bold">
+                                    ✓
+                                </span>{" "}
+                                Auditoría Zod <br />
+                                <span class="text-green-500 font-bold">
+                                    ✓
+                                </span>{" "}
+                                Purgado de Registros Antiguos <br />
+                                <span class="text-green-500 font-bold">
+                                    ✓
+                                </span>{" "}
+                                Inyección Edge-to-DB
+                            </p>
+                        </div>
+                        <a
+                            href="/"
+                            class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-sm font-medium rounded-xl shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                        >
+                            Ir al Dashboard Principal
+                            <svg
+                                class="ml-2 -mr-1 w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                />
+                            </svg>
+                        </a>
+                    </div>
+                ) : (
+                    <div class="p-8 text-center">
+                        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-100 mb-6 relative">
+                            <div class="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-20" />
+                            <svg
+                                class="h-10 w-10 text-red-600"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-gray-900 mb-2">
+                            Fallo en la Sincronización
+                        </h2>
+                        <p class="text-sm text-gray-500 mb-6">
+                            El proceso automatizado Edge fue interrumpido.
+                        </p>
+                        <div class="bg-red-50 border border-red-100 rounded-lg p-4 mb-6 text-left overflow-hidden">
+                            <p class="text-xs text-red-800 font-mono break-words">
+                                {mensajeError}
+                            </p>
+                        </div>
+                        <a
+                            href="/"
+                            class="w-full inline-flex justify-center items-center px-4 py-3 border border-red-200 text-sm font-medium rounded-xl shadow-sm text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                        >
+                            Regresar al Inicio
+                        </a>
+                    </div>
+                )
+            }
+        </div>
+    </body>
+</html>
