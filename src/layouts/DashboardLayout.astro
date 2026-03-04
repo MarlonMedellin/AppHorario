@@ -187,10 +187,18 @@ const { title = "Dashboard | Colmayor" } = Astro.props;
                 const userMenuBtnPage =
                     document.getElementById("user-menu-btn-page");
                 const userNamePage = document.getElementById("user-name-page");
+                const loginBtnPage = document.getElementById("login-btn-page");
+                const userMenuDropdownPage = document.getElementById(
+                    "user-menu-dropdown-page",
+                );
 
                 if (user) {
                     loginBtn?.classList.add("hidden");
                     userMenuBtn?.classList.remove("hidden");
+
+                    loginBtnPage?.classList.add("hidden");
+                    userMenuDropdownPage?.classList.remove("hidden");
+
                     // Sync page-level user display with session data
                     if (userNamePage)
                         userNamePage.textContent =
@@ -198,6 +206,9 @@ const { title = "Dashboard | Colmayor" } = Astro.props;
                 } else {
                     loginBtn?.classList.remove("hidden");
                     userMenuBtn?.classList.add("hidden");
+
+                    loginBtnPage?.classList.remove("hidden");
+                    userMenuDropdownPage?.classList.add("hidden");
                 }
             }
 
@@ -213,13 +224,15 @@ const { title = "Dashboard | Colmayor" } = Astro.props;
                     );
 
                 // Auth
-                document
-                    .getElementById("login-btn")
-                    ?.addEventListener("click", () =>
-                        window.dispatchEvent(
-                            new CustomEvent("open-login-modal"),
-                        ),
-                    );
+                ["login-btn", "login-btn-page"].forEach((id) => {
+                    document
+                        .getElementById(id)
+                        ?.addEventListener("click", () =>
+                            window.dispatchEvent(
+                                new CustomEvent("open-login-modal"),
+                            ),
+                        );
+                });
 
                 document
                     .getElementById("logout-btn")

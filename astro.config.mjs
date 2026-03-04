@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
+import cloudflare from '@astrojs/cloudflare';
 import { execSync } from 'node:child_process';
 
 const commitHash = execSync('git rev-parse --short HEAD').toString().trim();
@@ -15,5 +16,7 @@ export default defineConfig({
     },
   },
 
+  output: 'server',
+  adapter: cloudflare(),
   integrations: [react()]
 });

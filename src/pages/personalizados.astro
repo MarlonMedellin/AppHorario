@@ -1,55 +1,47 @@
 ---
 import { fetchMatrizFlexible } from "../services/sheetService";
 import DashboardLayout from "../layouts/DashboardLayout.astro";
-import DayTabs from "../components/DayTabs.astro";
-import HorarioTable from "../components/HorarioTable.astro";
+import PersonalizadosApp from "../components/PersonalizadosApp.jsx";
 
 // Fetch data
 const allData = await fetchMatrizFlexible();
 
-// Filter only personalized sessions (Tipo === "Asesoría Personalizada")
+// Filter only personalized sessions
 const personalizedData = allData.filter(
     (item) => item.Tipo && item.Tipo.toLowerCase().includes("personalizada"),
 );
 
-const currentDay = null;
+// Limpiar para asegurar JSON stringificable
+const cleanData = personalizedData.map((item) => ({
+    ...item,
+    Día: item.Día || "",
+    Asesor: item.Asesor || "",
+    Asignatura: item.Asignatura || "",
+    Hora_Inicio: item.Hora_Inicio || "",
+    Hora_Fin: item.Hora_Fin || "",
+    Area: item.Area || "",
+    Tipo: item.Tipo || "",
+    Modalidad: item.Modalidad || "",
+    Ubicación_Detalle: item.Ubicación_Detalle || "",
+    Sede: item.Sede || "",
+    CTA: item.CTA || "",
+    Link_Foto: item.Link_Foto || "",
+    Estado: item.Estado || "",
+    hasTypoError: item.hasTypoError || false,
+    typoDetails: item.typoDetails || "",
+}));
 ---
 
 <DashboardLayout title="Asesorías Personalizadas - HorariosQuedate">
-    <div class="relative min-h-screen flex flex-col">
-        <!-- Title Section -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-[var(--color-text-main)]">
-                Asesorías Personalizadas
-            </h1>
-            <p class="text-gray-500 dark:text-gray-400">
-                Vista de todas las asesorías personalizadas
-            </p>
-        </div>
+    <script is:inline>
+        (function () {
+            const session = localStorage.getItem("horarios_session");
+            if (!session) {
+                alert("Debes iniciar sesión para acceder a esta página");
+                window.location.href = "/";
+            }
+        })();
+    </script>
 
-        <!-- Day Tabs -->
-        <DayTabs activeDay={currentDay} />
-
-        <!-- Results Count -->
-        <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-            Mostrando <span class="font-bold text-[var(--color-brand)]"
-                >{personalizedData.length}</span
-            > asesorías personalizadas
-        </div>
-
-        <!-- Table -->
-        <div class="flex-1">
-            <HorarioTable data={personalizedData} />
-        </div>
-    </div>
+    <PersonalizadosApp client:load initialData={cleanData} />
 </DashboardLayout>
-
-<script>
-    import { isAuthenticated } from "../services/authService";
-
-    // Check authentication only (no role restriction)
-    if (!isAuthenticated()) {
-        alert("Debes iniciar sesión para acceder a esta página");
-        window.location.href = "/";
-    }
-</script>

@@ -14,7 +14,7 @@ export default defineConfig({
     reporter: 'line',
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     webServer: {
-        command: 'npm run dev',
+        command: 'cmd.exe /c npm run dev',
         url: 'http://localhost:4321',
         reuseExistingServer: true,
     },
@@ -24,6 +24,7 @@ export default defineConfig({
 
         /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
         trace: 'on-first-retry',
+        video: 'on',
 
         /* CRITICAL: Show the browser window so the user sees what's happening */
         headless: false,

@@ -136,7 +136,7 @@ export default function HorarioTable({ data }) {
                                 const isActive = isTodayName(item.Día) && isTimeSlotActive(item.Hora_Inicio, item.Hora_Fin) && !isCancelado;
 
                                 return (
-                                    <tr key={index} className={`group transition-colors ${isCancelado ? "bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20" : isActive ? "bg-green-50 dark:bg-green-900/20" : "hover:bg-slate-50 dark:hover:bg-slate-800/50"}`}>
+                                    <tr key={index} className={`group transition-colors ${isCancelado ? "bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20" : isActive ? "bg-green-50 dark:bg-green-900/20" : item.hasTypoError ? "border-l-4 border-l-red-500 hover:bg-slate-50 dark:hover:bg-slate-800/50" : "hover:bg-slate-50 dark:hover:bg-slate-800/50"}`}>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 <div className={`h-10 w-1 rounded-full ${isCancelado ? "bg-red-400" : isActive ? "bg-green-500" : "bg-slate-200 dark:bg-slate-600"}`} />
@@ -171,6 +171,9 @@ export default function HorarioTable({ data }) {
                                                     </div>
                                                     {isInterno && (
                                                         <span className="block text-xs text-yellow-700 dark:text-yellow-400 mt-1">⚠️ Solo contratistas/docentes</span>
+                                                    )}
+                                                    {item.hasTypoError && (
+                                                        <span className="block text-xs text-red-600 dark:text-red-400 mt-1 cursor-help" title={item.typoDetails}>🚨 Error de tipeo detectado</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -233,7 +236,7 @@ export default function HorarioTable({ data }) {
                     const isActive = isTodayName(item.Día) && isTimeSlotActive(item.Hora_Inicio, item.Hora_Fin) && !isCancelado;
 
                     return (
-                        <div key={index} className={`relative rounded-2xl p-4 shadow-lg border ${isCancelado ? "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30" : isActive ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700"}`}>
+                        <div key={index} className={`relative rounded-2xl p-4 shadow-lg border ${isCancelado ? "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30" : isActive ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : item.hasTypoError ? "bg-white dark:bg-slate-800 border-red-400 dark:border-red-600" : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700"}`}>
 
                             {/* Row 1: Tags + tiempo en dos líneas */}
                             <div className="flex flex-col gap-1 mb-2">
@@ -283,6 +286,10 @@ export default function HorarioTable({ data }) {
 
                             {isInterno && (
                                 <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-2">⚠️ Solo para contratistas/docentes</p>
+                            )}
+
+                            {item.hasTypoError && (
+                                <p className="text-xs text-red-600 dark:text-red-400 mt-2 cursor-help" title={item.typoDetails}>🚨 Error de tipeo: Revisa la ortografía</p>
                             )}
 
                             {/* Row 4: Sede / Acción */}

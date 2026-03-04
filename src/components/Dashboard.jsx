@@ -5,10 +5,10 @@ import SidebarFilters from './SidebarFilters';
 import DayTabs from './DayTabs';
 import ShareButton from './ShareButton';
 
-export default function Dashboard({ hideAdministrativeAreas }) {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [filteredData, setFilteredData] = useState([]);
+export default function Dashboard({ hideAdministrativeAreas, initialData = [] }) {
+    const [data, setData] = useState(initialData);
+    const [loading, setLoading] = useState(!initialData.length);
+    const [filteredData, setFilteredData] = useState(initialData);
     const captureRef = useRef(null);
 
     // Mapeo de días (0=Domingo, 1=Lunes...)
@@ -32,8 +32,10 @@ export default function Dashboard({ hideAdministrativeAreas }) {
     useEffect(() => {
         async function init() {
             try {
-                // Fetch Data
-                const fetchedData = await fetchMatrizFlexible();
+                let fetchedData = initialData;
+                if (!initialData.length) {
+                    fetchedData = await fetchMatrizFlexible();
+                }
                 // Filtrar para excluir el estado "Interno" de la vista pública
                 const publicData = fetchedData.filter(item => item.Estado !== "Interno");
                 setData(publicData);

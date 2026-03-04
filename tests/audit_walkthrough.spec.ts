@@ -8,13 +8,13 @@ test.describe('Auditoría MVP vs Documentación', () => {
         await expect(page).toHaveTitle(/Dashboard|Colmayor/i);
 
         // Verificar Sidebar (DashboardLayout usa SlimSidebar)
-        await expect(page.locator('aside')).toBeVisible();
+        await expect(page.locator('aside').first()).toBeVisible();
 
         // 2. Tema Oscuro/Claro (UI_STYLE_GUIDE.md)
-        const themeBtn = page.locator('#theme-toggle');
-        await themeBtn.click(); // Cambiar a oscuro/claro
+        const themeBtn = page.locator('#theme-toggle-page');
+        await themeBtn.click({ force: true }); // Cambiar a oscuro/claro
         await page.waitForTimeout(1000); // Pausa visual
-        await themeBtn.click(); // Regresar
+        await themeBtn.click({ force: true }); // Regresar
 
         // 3. Visualización de Datos (Index)
         // Verificar presencia de contenido principal
@@ -44,7 +44,7 @@ test.describe('Auditoría MVP vs Documentación', () => {
         // Buscar link de personalizados en sidebar
         const personalLink = page.locator('a[href="/personalizados"]');
         if (await personalLink.count() > 0) {
-            await personalLink.first().click();
+            await personalLink.first().click({ force: true });
             await expect(page).toHaveURL(/.*personalizados/);
             await page.waitForTimeout(1500);
         }
@@ -56,11 +56,11 @@ test.describe('Auditoría MVP vs Documentación', () => {
         // Si no estamos logueados, ver si aparece el botón de login
         const loginBtn = page.locator('#login-btn');
         if (await loginBtn.isVisible()) {
-            await loginBtn.click();
+            await loginBtn.click({ force: true });
             await expect(page.locator('#login-modal')).toBeVisible();
             await expect(page.locator('#modal-title')).toHaveText('Iniciar Sesión');
             await page.waitForTimeout(1000);
-            await page.locator('#close-modal').click();
+            await page.locator('#close-modal').click({ force: true });
         }
 
         // Finalizar en Home

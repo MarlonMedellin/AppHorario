@@ -2,6 +2,28 @@
 import DashboardLayout from "../layouts/DashboardLayout.astro";
 import SummaryCards from "../components/dashboard/SummaryCards.astro";
 import DashboardTable from "../components/Dashboard.jsx"; // Re-using the logic, but wrapped in new design
+import { fetchMatrizFlexible } from "../services/sheetService";
+
+const rawData = await fetchMatrizFlexible();
+// Limpiar para JSON (evitar errores de serialización SSR)
+const cleanData = rawData.map((item) => ({
+	...item,
+	Día: item.Día || "",
+	Asesor: item.Asesor || "",
+	Asignatura: item.Asignatura || "",
+	Hora_Inicio: item.Hora_Inicio || "",
+	Hora_Fin: item.Hora_Fin || "",
+	Area: item.Area || "",
+	Tipo: item.Tipo || "",
+	Modalidad: item.Modalidad || "",
+	Ubicación_Detalle: item.Ubicación_Detalle || "",
+	Sede: item.Sede || "",
+	CTA: item.CTA || "",
+	Link_Foto: item.Link_Foto || "",
+	Estado: item.Estado || "",
+	hasTypoError: item.hasTypoError || false,
+	typoDetails: item.typoDetails || "",
+}));
 ---
 
 <DashboardLayout
@@ -92,7 +114,13 @@ import DashboardTable from "../components/Dashboard.jsx"; // Re-using the logic,
 							></path>
 						</svg>
 					</button>
-					<div class="relative group">
+					<button
+						id="login-btn-page"
+						class="px-4 py-2 bg-[var(--color-brand)] text-white rounded-lg hover:opacity-90 transition font-medium text-sm shadow-md shadow-blue-500/20"
+					>
+						Iniciar Sesión
+					</button>
+					<div class="relative group" id="user-menu-dropdown-page">
 						<button
 							id="user-menu-btn-page"
 							class="flex items-center gap-2 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 p-1.5 rounded-full transition"
@@ -129,8 +157,9 @@ import DashboardTable from "../components/Dashboard.jsx"; // Re-using the logic,
 				>
 					<!-- Schedule Table -->
 					<DashboardTable
-						client:only="react"
+						client:load
 						hideAdministrativeAreas={true}
+						initialData={cleanData}
 					/>
 				</div>
 			</div>

@@ -22,8 +22,8 @@ test.describe('Premium UI Enhancements Audit', () => {
     });
 
     test('Phase 2: Verify Modality Icons (Video or Building)', async ({ page }) => {
-        // Find the modality badge
-        const modalityBadge = page.locator('table tbody tr').first().locator('td').nth(1).locator('.rounded-full').nth(1);
+        // Find the modality/sede badge in the last column (index 5)
+        const modalityBadge = page.locator('table tbody tr').first().locator('td').nth(5).locator('span.inline-flex').first();
 
         await expect(modalityBadge).toBeVisible();
 
@@ -41,8 +41,8 @@ test.describe('Premium UI Enhancements Audit', () => {
         // Hover over the advisor cell to trigger the hover state (opacity-100)
         await advisorCell.hover();
 
-        // Look for the card using text instead of complex CSS classes
-        const hoverCard = advisorCell.locator('text=/Asesor de/').locator('..');
+        // Look for the hover card container
+        const hoverCard = advisorCell.locator('div').filter({ has: page.locator('img') }).first();
 
         // Ensure it's mounted and visible
         await expect(hoverCard).toBeVisible();

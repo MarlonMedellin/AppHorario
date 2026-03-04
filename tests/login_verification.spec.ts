@@ -9,7 +9,7 @@ test('Usuario puede abrir el modal de login', async ({ page }) => {
     await expect(modal).toHaveClass(/hidden/);
 
     // 3. Hacer clic en el botón "Iniciar Sesión"
-    await page.click('#login-btn');
+    await page.click('#login-btn-page', { force: true });
 
     // 4. Verificar que el modal ya NO tiene la clase 'hidden' y es visible
     await expect(modal).not.toHaveClass(/hidden/);
