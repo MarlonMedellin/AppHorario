@@ -9,10 +9,11 @@ const TOKEN_SECRETO = "1235711primo";
 const URL_SOLICITADA = new URL(Astro.request.url);
 const TOKEN_PROPORCIONADO = URL_SOLICITADA.searchParams.get("token");
 
+const runtimeEnv = (Astro.locals as any)?.runtime?.env || {};
 const SUPABASE_URL =
-    import.meta.env.PUBLIC_SUPABASE_URL || import.meta.env.SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
-const GOOGLE_SHEET_URL = import.meta.env.PUBLIC_CSV_URL_MATRIZ;
+    import.meta.env.PUBLIC_SUPABASE_URL || import.meta.env.SUPABASE_URL || runtimeEnv.PUBLIC_SUPABASE_URL || runtimeEnv.SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || runtimeEnv.SUPABASE_SERVICE_ROLE_KEY;
+const GOOGLE_SHEET_URL = import.meta.env.PUBLIC_CSV_URL_MATRIZ || runtimeEnv.PUBLIC_CSV_URL_MATRIZ;
 
 // Variables de Estado de la Sincronización
 let syncHabilitada = false;
