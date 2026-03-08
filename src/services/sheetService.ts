@@ -8,38 +8,58 @@ const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY)
     ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     : null;
 
+// Cache en memoria con TTL para evitar consultas repetidas a Supabase
+let cachedHorarios: any[] | null = null;
+let cacheTimestampHorarios = 0;
+let cachedUsuarios: any[] | null = null;
+let cacheTimestampUsuarios = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+
 export async function fetchMatrizFlexible(forceRefresh = false) {
     if (!supabase) {
         console.warn('⚠️ IMPORTANTE: Credenciales de Supabase no configuradas (.env). Cargando datos Mock para propósitos de Testing visual.');
         return getMockData();
     }
 
+    // Retornar caché si es válido y no se fuerza refresh
+    if (!forceRefresh && cachedHorarios && (Date.now() - cacheTimestampHorarios < CACHE_TTL)) {
+        console.log(`⚡ Datos servidos desde caché (${cachedHorarios.length} registros).`);
+        return cachedHorarios;
+    }
+
     try {
         const { data, error } = await supabase
             .from('horarios')
-            .select('*')
-            // Opcional: ordenar si es necesario
-            // .order('Día', { ascending: true })
-            ;
+            .select('Asesor,Día,Area,Hora_Inicio,Hora_Fin,Sede,Tipo,Asignatura,Modalidad,Ubicación_Detalle,CTA,Link_Foto,Estado,hasTypoError,typoDetails');
 
         if (error) {
             throw error;
         }
 
         console.log(`✅ Datos cargados desde Supabase: ${data.length} registros (Ultra-rápidos).`);
-        return data || [];
+        cachedHorarios = data || [];
+        cacheTimestampHorarios = Date.now();
+        return cachedHorarios;
     } catch (error) {
         console.error('❌ Error crítico al consultar Supabase:', error);
+        // Si hay caché expirado, usarlo como fallback
+        if (cachedHorarios) {
+            console.warn('⚠️ Usando caché expirado como fallback.');
+            return cachedHorarios;
+        }
         return []; // Fallback silencioso por seguridad
     }
 }
 
-// Mantenemos esto si hay otra tabla, pero en un caso ideal, esta config de usuarios
-// también migraría a Supabase. De momento lo simularemos o ignoraremos, ya que el Auth puede suplirlo.
 export async function fetchConfigUsers(forceRefresh = false) {
     if (!supabase) {
         console.warn('⚠️ IMPORTANTE: Credenciales de Supabase no configuradas. Retornando lista vacía de usuarios.');
         return [];
+    }
+
+    // Retornar caché si es válido
+    if (!forceRefresh && cachedUsuarios && (Date.now() - cacheTimestampUsuarios < CACHE_TTL)) {
+        return cachedUsuarios;
     }
 
     try {
@@ -52,15 +72,20 @@ export async function fetchConfigUsers(forceRefresh = false) {
         }
 
         console.log(`✅ Usuarios cargados desde Supabase: ${data?.length || 0} registros.`);
-        return data || [];
+        cachedUsuarios = data || [];
+        cacheTimestampUsuarios = Date.now();
+        return cachedUsuarios;
     } catch (error) {
         console.error('❌ Error al consultar usuarios en Supabase:', error);
+        if (cachedUsuarios) {
+            return cachedUsuarios;
+        }
         return [];
     }
 }
 
 function getMockData() {
-    const mockRows = [];
+    const mockRows: any[] = [];
     const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
     // Generar un registro Académico y uno Personalizado por cada día
