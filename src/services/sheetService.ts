@@ -37,7 +37,26 @@ export async function fetchMatrizFlexible(forceRefresh = false) {
 // Mantenemos esto si hay otra tabla, pero en un caso ideal, esta config de usuarios
 // también migraría a Supabase. De momento lo simularemos o ignoraremos, ya que el Auth puede suplirlo.
 export async function fetchConfigUsers(forceRefresh = false) {
-    return []; // Temporalmente desactivado hasta migrar Auth.
+    if (!supabase) {
+        console.warn('⚠️ IMPORTANTE: Credenciales de Supabase no configuradas. Retornando lista vacía de usuarios.');
+        return [];
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('usuarios')
+            .select('*');
+
+        if (error) {
+            throw error;
+        }
+
+        console.log(`✅ Usuarios cargados desde Supabase: ${data?.length || 0} registros.`);
+        return data || [];
+    } catch (error) {
+        console.error('❌ Error al consultar usuarios en Supabase:', error);
+        return [];
+    }
 }
 
 function getMockData() {

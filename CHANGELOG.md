@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.7.1] - 2026-03-08
+
+### Fixed
+- **Auth:** Migración de la validación de usuarios a la base de datos de Supabase, eliminando la dependencia del arreglo en código.
+
 ## [1.3.1] - 2026-02-05
 
 ### Fixed
