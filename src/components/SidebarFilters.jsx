@@ -8,7 +8,7 @@ export default function SidebarFilters({ allData, currentFilters, availableOptio
     let allAreas = [
         "Matemáticas", "Álgebra Lineal y Geometrías", "Cálculos",
         "Estadísticas", "Físicas", "Humanidades", "Investigación",
-        "Otras Administración", "Químicas", "Receso",
+        "Otras Administración", "Otras Bacteriología", "Químicas", "Receso",
         "Horas Administrativas", "Varias"
     ];
 

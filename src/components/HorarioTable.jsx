@@ -12,6 +12,7 @@ const areaColorMap = {
     "Estadisticas": "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400",
     "Químicas": "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400",
     "Quimicas": "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400",
+    "Otras Bacteriología": "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400",
 };
 
 // Links for virtual modalities
@@ -23,6 +24,9 @@ const modalidadLinks = {
 };
 
 const Icons = {
+    Activity: () => (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+    ),
     Calculator: () => (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
     ),
@@ -60,6 +64,7 @@ const Icons = {
 
 const getAreaIcon = (area) => {
     switch (area) {
+        case "Otras Bacteriología": return <Icons.Activity />;
         case "Matemáticas": return <Icons.Calculator />;
         case "Cálculos": case "Calculos": return <Icons.Infinity />;
         case "Álgebra Lineal y Geometrías": return <Icons.Ruler />;
